@@ -8,8 +8,7 @@ class DayRecord {
 
   int get total => cuts.fold(0, (s, c) => s + c.price);
 
-  int get myShare =>
-      cuts.fold(0, (s, c) => s + ((c.price * c.percent) ~/ 100));
+  int get myShare => cuts.fold(0, (s, c) => s + ((c.price * c.percent) ~/ 100));
 
   int get bossShare => total - myShare;
 
@@ -24,4 +23,9 @@ class DayRecord {
             .map((e) => Cut.fromJson(Map<String, dynamic>.from(e)))
             .toList(),
       );
+  int get day => date.day;
+  int get month => date.month;
+  int get year => date.year;
+
+  String get formattedDate => '${date.day}/${date.month}/${date.year}';
 }
