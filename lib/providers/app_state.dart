@@ -3,29 +3,32 @@ import 'package:flutter/foundation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../models/cut.dart';
 import '../models/day_record.dart';
+import '../models/predefined_service.dart';
 
 class AppState extends ChangeNotifier {
   static const String _kHistoryKey = 'history_v1';
   static const String _kSettingsKey = 'settings_v1';
+  static const String _kServicesKey = 'predefined_services_v1';
 
   int defaultPercent = 50;
-  int historyLimit = 3; // par défaut 3 jours
+  int historyLimit = 3;
 
   late DayRecord currentDay;
-  List<DayRecord> history = []; // jours précédents, plus récents en premier
+  List<DayRecord> history = [];
+  
+  // NOUVEAU: Liste des services prédéfinis
+  List<PredefinedService> predefinedServices = [];
 
   AppState() {
     currentDay = DayRecord(date: _todayDate());
     load();
   }
 
-  /// Date sans heure (ex: 2025-09-11)
   static DateTime _todayDate() {
     final now = DateTime.now();
     return DateTime(now.year, now.month, now.day);
   }
 
-  /// Charger données
   Future<void> load() async {
     final prefs = await SharedPreferences.getInstance();
 
@@ -52,6 +55,17 @@ class AppState extends ChangeNotifier {
       }
     }
 
+    // NOUVEAU: Charger les services prédéfinis
+    final servicesStr = prefs.getString(_kServicesKey);
+    if (servicesStr != null) {
+      try {
+        final list = jsonDecode(servicesStr) as List<dynamic>;
+        predefinedServices = list.map((e) => PredefinedService.fromJson(Map<String, dynamic>.from(e))).toList();
+      } catch (_) {
+        predefinedServices = [];
+      }
+    }
+
     // restaurer currentDay si présent
     final todayKey = _todayDate();
     if (history.isNotEmpty && history.first.date == todayKey) {
@@ -63,7 +77,6 @@ class AppState extends ChangeNotifier {
     notifyListeners();
   }
 
-  /// Sauvegarder tout
   Future<void> _saveAll() async {
     final prefs = await SharedPreferences.getInstance();
 
@@ -80,9 +93,12 @@ class AppState extends ChangeNotifier {
       ...history.map((d) => d.toJson()),
     ];
     await prefs.setString(_kHistoryKey, jsonEncode(histToSave));
+    
+    // NOUVEAU: Sauvegarder les services prédéfinis
+    final servicesJson = predefinedServices.map((s) => s.toJson()).toList();
+    await prefs.setString(_kServicesKey, jsonEncode(servicesJson));
   }
 
-  /// Ajouter une coupe
   void addCut({required int price, required int percent, String service = ''}) {
     final cut = Cut(price: price, percent: percent, service: service);
     currentDay.cuts.add(cut);
@@ -90,7 +106,6 @@ class AppState extends ChangeNotifier {
     _saveAll();
   }
 
-  /// Supprimer une coupe
   void removeCut(int index) {
     if (index >= 0 && index < currentDay.cuts.length) {
       currentDay.cuts.removeAt(index);
@@ -99,7 +114,6 @@ class AppState extends ChangeNotifier {
     }
   }
 
-  /// Fermer la journée et sauvegarder
   void closeDay() {
     if (currentDay.cuts.isEmpty) return;
 
@@ -114,7 +128,6 @@ class AppState extends ChangeNotifier {
     _saveAll();
   }
 
-  /// Mettre à jour les paramètres
   void updateSettings({int? defaultPercent, int? historyLimit}) {
     if (defaultPercent != null) this.defaultPercent = defaultPercent;
     if (historyLimit != null) this.historyLimit = historyLimit;
@@ -125,5 +138,32 @@ class AppState extends ChangeNotifier {
 
     notifyListeners();
     _saveAll();
+  }
+  
+  // NOUVELLES MÉTHODES POUR LES SERVICES PRÉDÉFINIS
+  void addPredefinedService(String name, int price) {
+    predefinedServices.add(PredefinedService(name: name, price: price));
+    notifyListeners();
+    _saveAll();
+  }
+  
+  void updatePredefinedService(int index, String name, int price) {
+    if (index >= 0 && index < predefinedServices.length) {
+      predefinedServices[index] = PredefinedService(
+        id: predefinedServices[index].id,
+        name: name,
+        price: price
+      );
+      notifyListeners();
+      _saveAll();
+    }
+  }
+  
+  void removePredefinedService(int index) {
+    if (index >= 0 && index < predefinedServices.length) {
+      predefinedServices.removeAt(index);
+      notifyListeners();
+      _saveAll();
+    }
   }
 }

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../providers/app_state.dart';
+import '../models/predefined_service.dart';
 
 class SettingsScreen extends StatefulWidget {
   const SettingsScreen({super.key});
@@ -20,6 +21,120 @@ class _SettingsScreenState extends State<SettingsScreen> {
     _historyLimit = s.historyLimit;
   }
 
+  void _showAddServiceDialog(BuildContext context) {
+    final nameController = TextEditingController();
+    final priceController = TextEditingController();
+    
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Nouveau service'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            TextField(
+              controller: nameController,
+              decoration: const InputDecoration(
+                labelText: 'Nom du service',
+                border: OutlineInputBorder(),
+              ),
+            ),
+            const SizedBox(height: 12),
+            TextField(
+              controller: priceController,
+              keyboardType: TextInputType.number,
+              decoration: const InputDecoration(
+                labelText: 'Prix (DA)',
+                border: OutlineInputBorder(),
+              ),
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Annuler'),
+          ),
+          ElevatedButton(
+            onPressed: () {
+              final name = nameController.text.trim();
+              final price = int.tryParse(priceController.text) ?? 0;
+              if (name.isNotEmpty && price > 0) {
+                Provider.of<AppState>(context, listen: false)
+                  .addPredefinedService(name, price);
+                Navigator.pop(context);
+              } else {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(content: Text('Veuillez remplir tous les champs correctement')),
+                );
+              }
+            },
+            child: const Text('Ajouter'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _showEditServiceDialog(BuildContext context, PredefinedService service, int index) {
+    final nameController = TextEditingController(text: service.name);
+    final priceController = TextEditingController(text: service.price.toString());
+    
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Modifier le service'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            TextField(
+              controller: nameController,
+              decoration: const InputDecoration(
+                labelText: 'Nom du service',
+                border: OutlineInputBorder(),
+              ),
+            ),
+            const SizedBox(height: 12),
+            TextField(
+              controller: priceController,
+              keyboardType: TextInputType.number,
+              decoration: const InputDecoration(
+                labelText: 'Prix (DA)',
+                border: OutlineInputBorder(),
+              ),
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Annuler'),
+          ),
+          ElevatedButton(
+            onPressed: () {
+              final name = nameController.text.trim();
+              final price = int.tryParse(priceController.text) ?? 0;
+              if (name.isNotEmpty && price > 0) {
+                Provider.of<AppState>(context, listen: false)
+                  .updatePredefinedService(index, name, price);
+                Navigator.pop(context);
+              }
+            },
+            child: const Text('Modifier'),
+          ),
+          IconButton(
+            onPressed: () {
+              Provider.of<AppState>(context, listen: false)
+                .removePredefinedService(index);
+              Navigator.pop(context);
+            },
+            icon: const Icon(Icons.delete, color: Colors.red),
+          ),
+        ],
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final appState = Provider.of<AppState>(context);
@@ -27,9 +142,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
     return Scaffold(
       body: SafeArea(
-        // ✅ AJOUTÉ POUR ÉVITER LES BORDUres
         child: SingleChildScrollView(
-          // ✅ PERMET LE SCROLL
           padding: const EdgeInsets.all(16.0),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -120,10 +233,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
                           Text('0%', style: TextStyle(color: Colors.grey[600])),
-                          Text('50%',
-                              style: TextStyle(color: Colors.grey[600])),
-                          Text('100%',
-                              style: TextStyle(color: Colors.grey[600])),
+                          Text('50%', style: TextStyle(color: Colors.grey[600])),
+                          Text('100%', style: TextStyle(color: Colors.grey[600])),
                         ],
                       ),
                       const SizedBox(height: 20),
@@ -286,8 +397,97 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   ),
                 ),
               ),
+              const SizedBox(height: 16),
 
-              const SizedBox(height: 24), // ✅ REMPLACE LE SPACER()
+              // NOUVELLE SECTION: SERVICES PRÉDÉFINIS
+              Card(
+                elevation: 2,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Padding(
+                  padding: const EdgeInsets.all(16.0),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'SERVICES PRÉDÉFINIS',
+                        style: TextStyle(
+                          fontWeight: FontWeight.bold,
+                          color: Colors.grey[600],
+                          fontSize: 14,
+                        ),
+                      ),
+                      const SizedBox(height: 12),
+                      
+                      // BOUTON AJOUTER SERVICE
+                      ElevatedButton(
+                        onPressed: () => _showAddServiceDialog(context),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.green,
+                          foregroundColor: Colors.white,
+                          minimumSize: const Size.fromHeight(44),
+                        ),
+                        child: const Text('➕ Ajouter un service'),
+                      ),
+                      const SizedBox(height: 12),
+                      
+                      // LISTE DES SERVICES
+                      Consumer<AppState>(
+                        builder: (context, appState, child) {
+                          if (appState.predefinedServices.isEmpty) {
+                            return const Padding(
+                              padding: EdgeInsets.all(16.0),
+                              child: Text(
+                                'Aucun service prédéfini\nAjoutez vos services fréquents',
+                                textAlign: TextAlign.center,
+                                style: TextStyle(color: Colors.grey),
+                              ),
+                            );
+                          }
+                          
+                          return Column(
+                            children: [
+                              ...appState.predefinedServices.asMap().entries.map((entry) {
+                                final service = entry.value;
+                                final index = entry.key;
+                                return Card(
+                                  margin: const EdgeInsets.only(bottom: 8),
+                                  child: ListTile(
+                                    title: Text(
+                                      service.name,
+                                      style: const TextStyle(fontWeight: FontWeight.w500),
+                                    ),
+                                    subtitle: Text('${service.price} DA'),
+                                    trailing: Row(
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: [
+                                        IconButton(
+                                          onPressed: () => _showEditServiceDialog(context, service, index),
+                                          icon: const Icon(Icons.edit, color: Colors.blue),
+                                        ),
+                                        IconButton(
+                                          onPressed: () {
+                                            Provider.of<AppState>(context, listen: false)
+                                              .removePredefinedService(index);
+                                          },
+                                          icon: const Icon(Icons.delete, color: Colors.red),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                );
+                              }),
+                            ],
+                          );
+                        },
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+
+              const SizedBox(height: 24),
 
               // BOUTON SAUVEGARDER
               ElevatedButton(
@@ -295,8 +495,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   appState.updateSettings(
                       defaultPercent: percent, historyLimit: _historyLimit);
                   ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-                    content:
-                        Text('✅ Paramètres sauvegardés - $percent% défini'),
+                    content: Text('✅ Paramètres sauvegardés - $percent% défini'),
                     backgroundColor: Colors.green,
                     duration: const Duration(seconds: 2),
                   ));
@@ -319,7 +518,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 ),
               ),
 
-              const SizedBox(height: 20), // ✅ ESPACE ADDITIONNEL POUR LE SCROLL
+              const SizedBox(height: 20),
             ],
           ),
         ),

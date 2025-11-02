@@ -30,6 +30,25 @@ class _AddCutScreenState extends State<AddCutScreen> {
     super.dispose();
   }
 
+  Widget _buildPriceField() {
+    return TextFormField(
+      controller: _priceCtrl,
+      keyboardType: TextInputType.number,
+      decoration: InputDecoration(
+        labelText: 'Prix personnalisé (DA)',
+        border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
+        filled: true,
+        fillColor: Colors.grey[50],
+      ),
+      validator: (v) {
+        if (v == null || v.isEmpty) return 'Entrer un prix';
+        if (int.tryParse(v) == null) return 'Prix invalide';
+        return null;
+      },
+      onChanged: (_) => setState(() {}),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final appState = Provider.of<AppState>(context);
@@ -46,36 +65,81 @@ class _AddCutScreenState extends State<AddCutScreen> {
         foregroundColor: Colors.white,
       ),
       body: GestureDetector(
-        // ⬅️ PERMET DE CACHER LE CLAVIER EN TAPPANT AILLEURS
         onTap: () => FocusScope.of(context).unfocus(),
         child: Padding(
           padding: const EdgeInsets.all(16.0),
           child: Form(
             key: _formKey,
             child: SingleChildScrollView(
-              // ⬅️ SOLUTION PRINCIPALE
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  TextFormField(
-                    controller: _priceCtrl,
-                    keyboardType: TextInputType.number,
-                    decoration: InputDecoration(
-                      labelText: 'Prix de la coupe (DA)',
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      filled: true,
-                      fillColor: Colors.grey[50],
-                    ),
-                    validator: (v) {
-                      if (v == null || v.isEmpty) return 'Entrer un prix';
-                      if (int.tryParse(v) == null) return 'Prix invalide';
-                      return null;
+                  // SECTION SERVICES PRÉDÉFINIS
+                  Consumer<AppState>(
+                    builder: (context, appState, child) {
+                      if (appState.predefinedServices.isNotEmpty) {
+                        return Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              'Services rapides',
+                              style: TextStyle(
+                                fontWeight: FontWeight.w500,
+                                color: Colors.grey[700],
+                                fontSize: 16,
+                              ),
+                            ),
+                            const SizedBox(height: 8),
+                            Wrap(
+                              spacing: 8,
+                              runSpacing: 8,
+                              children:
+                                  appState.predefinedServices.map((service) {
+                                return FilterChip(
+                                  label: Text(
+                                      '${service.name} - ${service.price} DA'),
+                                  selected: _priceCtrl.text ==
+                                          service.price.toString() &&
+                                      _serviceCtrl.text == service.name,
+                                  onSelected: (selected) {
+                                    setState(() {
+                                      _priceCtrl.text =
+                                          service.price.toString();
+                                      _serviceCtrl.text = service.name;
+                                    });
+                                  },
+                                  selectedColor: Colors.green,
+                                  checkmarkColor: Colors.white,
+                                  labelStyle: TextStyle(
+                                    color: _priceCtrl.text ==
+                                            service.price.toString()
+                                        ? Colors.white
+                                        : Colors.black,
+                                  ),
+                                );
+                              }).toList(),
+                            ),
+                            const SizedBox(height: 16),
+                            Text(
+                              'Ou prix personnalisé :',
+                              style: TextStyle(
+                                fontWeight: FontWeight.w500,
+                                color: Colors.grey[600],
+                              ),
+                            ),
+                            const SizedBox(height: 8),
+                          ],
+                        );
+                      }
+                      return const SizedBox();
                     },
-                    onChanged: (_) => setState(() {}),
                   ),
+
+                  // CHAMP PRIX
+                  _buildPriceField(),
                   const SizedBox(height: 12),
+
+                  // CHAMP POURCENTAGE
                   TextFormField(
                     controller: _percentCtrl,
                     keyboardType: TextInputType.number,
@@ -99,6 +163,8 @@ class _AddCutScreenState extends State<AddCutScreen> {
                     onChanged: (_) => setState(() {}),
                   ),
                   const SizedBox(height: 12),
+
+                  // CHAMP SERVICE
                   TextFormField(
                     controller: _serviceCtrl,
                     decoration: InputDecoration(
@@ -150,9 +216,6 @@ class _AddCutScreenState extends State<AddCutScreen> {
                   ),
                   const SizedBox(height: 18),
 
-                  // SUPPRIMER le Spacer() car incompatible avec SingleChildScrollView
-                  // const Spacer(), ⬅️ À SUPPRIMER !
-
                   // Boutons
                   ElevatedButton(
                     onPressed: () {
@@ -199,8 +262,7 @@ class _AddCutScreenState extends State<AddCutScreen> {
                     ),
                   ),
 
-                  const SizedBox(
-                      height: 20), // ⬅️ ESPACE ADDITIONNEL pour le scroll
+                  const SizedBox(height: 20),
                 ],
               ),
             ),
