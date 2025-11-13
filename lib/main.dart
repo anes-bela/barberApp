@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:gestion_jr/screens/splash_page.dart';
 import 'package:provider/provider.dart';
 import 'providers/app_state.dart';
 import 'screens/home_screen.dart';
@@ -40,7 +41,7 @@ class MyApp extends StatelessWidget {
           ),
         ),
       ),
-      home: const MainScaffold(),
+      home: const SplashScreen(),
     );
   }
 }
@@ -94,17 +95,17 @@ class _MainScaffoldState extends State<MainScaffold> {
       ),
       floatingActionButton: _selectedIndex == 0
           ? FloatingActionButton(
-              onPressed: () => Navigator.of(context).push(
-                MaterialPageRoute(builder: (_) => const AddCutScreen()),
-              ),
-              backgroundColor: Colors.green,
-              foregroundColor: Colors.white,
-              elevation: 4,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(16),
-              ),
-              child: const Icon(Icons.add, size: 28),
-            )
+        onPressed: () => Navigator.of(context).push(
+          MaterialPageRoute(builder: (_) => const AddCutScreen()),
+        ),
+        backgroundColor: Colors.green,
+        foregroundColor: Colors.white,
+        elevation: 4,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(16),
+        ),
+        child: const Icon(Icons.add, size: 28),
+      )
           : null,
     );
   }
