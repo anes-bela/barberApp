@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import '../providers/app_state.dart';
 import 'login_page.dart';
 import '../main.dart';
-
 
 class SignupPage extends StatefulWidget {
   const SignupPage({super.key});
@@ -15,15 +16,23 @@ class _SignupPageState extends State<SignupPage> {
   bool _obscurePassword = true;
   bool _obscureConfirmPassword = true;
 
-  final _nameController = TextEditingController();
-  final _emailController = TextEditingController();
-  final _passwordController = TextEditingController();
-  final _confirmController = TextEditingController();
+  final TextEditingController _nameController = TextEditingController();
+  final TextEditingController _emailController = TextEditingController();
+  final TextEditingController _passwordController = TextEditingController();
+  final TextEditingController _confirmPasswordController =
+  TextEditingController();
 
   @override
   Widget build(BuildContext context) {
+    final appState = Provider.of<AppState>(context);
+    final bool darkMode = appState.isDarkMode;
+    final Color backgroundColor = darkMode ? Colors.black : Colors.white;
+    final Color textColor = darkMode ? Colors.white : Colors.black;
+    final Color fieldColor = darkMode ? Colors.grey[800]! : Colors.white;
+    final Color mainGreen = const Color(0xFF4CAF50);
+
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: backgroundColor,
       body: Padding(
         padding: const EdgeInsets.all(24.0),
         child: Center(
@@ -31,72 +40,110 @@ class _SignupPageState extends State<SignupPage> {
             child: Form(
               key: _formKey,
               child: Column(
+                crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
-                  const Text(
-                    "Create Account",
-                    style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold),
+                  Text(
+                    "S’inscrire",
+                    style: TextStyle(
+                      fontSize: 26,
+                      fontWeight: FontWeight.bold,
+                      color: textColor,
+                    ),
                   ),
                   const SizedBox(height: 8),
-                  const Text(
-                    "Create a new account to get started and enjoy seamless access.",
+                  Text(
+                    "Créez un compte pour profiter de toutes les fonctionnalités.",
                     textAlign: TextAlign.center,
-                    style: TextStyle(color: Colors.grey),
+                    style: TextStyle(
+                        fontSize: 13,
+                        color: darkMode ? Colors.grey[400] : Colors.grey),
                   ),
-                  const SizedBox(height: 30),
+                  const SizedBox(height: 40),
 
-                  // Name
+                  // Nom complet
                   TextFormField(
                     controller: _nameController,
-                    decoration: const InputDecoration(
-                      prefixIcon: Icon(Icons.person_outline),
-                      labelText: "Name",
+                    style: TextStyle(color: textColor),
+                    decoration: InputDecoration(
+                      filled: true,
+                      fillColor: fieldColor,
+                      prefixIcon:
+                      Icon(Icons.person_outline, color: mainGreen),
+                      labelText: "Nom complet",
+                      labelStyle: TextStyle(
+                          color: darkMode
+                              ? Colors.grey[300]
+                              : Colors.grey[700]),
                       border: OutlineInputBorder(
-                          borderRadius:
-                          BorderRadius.all(Radius.circular(30))),
-                    ),
-                    validator: (value) =>
-                    value == null || value.isEmpty ? "Enter your name" : null,
-                  ),
-                  const SizedBox(height: 20),
-
-                  // Email
-                  TextFormField(
-                    controller: _emailController,
-                    decoration: const InputDecoration(
-                      prefixIcon: Icon(Icons.email_outlined),
-                      labelText: "Email address",
-                      border: OutlineInputBorder(
-                          borderRadius:
-                          BorderRadius.all(Radius.circular(30))),
+                        borderRadius: BorderRadius.circular(30),
+                      ),
                     ),
                     validator: (value) {
                       if (value == null || value.isEmpty) {
-                        return "Enter your email";
-                      }
-                      if (!RegExp(r'^[\w-.]+@([\w-]+\.)+[\w-]{2,4}$')
-                          .hasMatch(value)) {
-                        return "Enter a valid email";
+                        return "Veuillez entrer votre nom complet";
                       }
                       return null;
                     },
                   ),
                   const SizedBox(height: 20),
 
-                  // Password
+                  // Email
+                  TextFormField(
+                    controller: _emailController,
+                    style: TextStyle(color: textColor),
+                    decoration: InputDecoration(
+                      filled: true,
+                      fillColor: fieldColor,
+                      prefixIcon:
+                      Icon(Icons.email_outlined, color: mainGreen),
+                      labelText: "Adresse e-mail",
+                      labelStyle: TextStyle(
+                          color: darkMode
+                              ? Colors.grey[300]
+                              : Colors.grey[700]),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(30),
+                      ),
+                    ),
+                    validator: (value) {
+                      if (value == null || value.isEmpty) {
+                        return "Veuillez entrer votre adresse e-mail";
+                      }
+                      if (!RegExp(r'^[\w-.]+@([\w-]+\.)+[\w-]{2,4}$')
+                          .hasMatch(value)) {
+                        return "Entrez une adresse e-mail valide";
+                      }
+                      return null;
+                    },
+                  ),
+                  const SizedBox(height: 20),
+
+                  // Mot de passe
                   TextFormField(
                     controller: _passwordController,
                     obscureText: _obscurePassword,
+                    style: TextStyle(color: textColor),
                     decoration: InputDecoration(
-                      prefixIcon: const Icon(Icons.lock_outline),
-                      labelText: "Password",
-                      border: const OutlineInputBorder(
-                          borderRadius:
-                          BorderRadius.all(Radius.circular(30))),
+                      filled: true,
+                      fillColor: fieldColor,
+                      prefixIcon:
+                      Icon(Icons.lock_outline, color: mainGreen),
+                      labelText: "Mot de passe",
+                      labelStyle: TextStyle(
+                          color: darkMode
+                              ? Colors.grey[300]
+                              : Colors.grey[700]),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(30),
+                      ),
                       suffixIcon: IconButton(
                         icon: Icon(
                           _obscurePassword
                               ? Icons.visibility_off
                               : Icons.visibility,
+                          color: darkMode
+                              ? Colors.grey[400]
+                              : Colors.grey[700],
                         ),
                         onPressed: () {
                           setState(() {
@@ -107,31 +154,42 @@ class _SignupPageState extends State<SignupPage> {
                     ),
                     validator: (value) {
                       if (value == null || value.isEmpty) {
-                        return "Enter your password";
+                        return "Veuillez entrer votre mot de passe";
                       }
                       if (value.length < 6) {
-                        return "At least 6 characters";
+                        return "Le mot de passe doit contenir au moins 6 caractères";
                       }
                       return null;
                     },
                   ),
                   const SizedBox(height: 20),
 
-                  // Confirm Password
+                  // Confirmer mot de passe
                   TextFormField(
-                    controller: _confirmController,
+                    controller: _confirmPasswordController,
                     obscureText: _obscureConfirmPassword,
+                    style: TextStyle(color: textColor),
                     decoration: InputDecoration(
-                      prefixIcon: const Icon(Icons.lock_outline),
-                      labelText: "Confirm Password",
-                      border: const OutlineInputBorder(
-                          borderRadius:
-                          BorderRadius.all(Radius.circular(30))),
+                      filled: true,
+                      fillColor: fieldColor,
+                      prefixIcon:
+                      Icon(Icons.lock_outline, color: mainGreen),
+                      labelText: "Confirmer le mot de passe",
+                      labelStyle: TextStyle(
+                          color: darkMode
+                              ? Colors.grey[300]
+                              : Colors.grey[700]),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(30),
+                      ),
                       suffixIcon: IconButton(
                         icon: Icon(
                           _obscureConfirmPassword
                               ? Icons.visibility_off
                               : Icons.visibility,
+                          color: darkMode
+                              ? Colors.grey[400]
+                              : Colors.grey[700],
                         ),
                         onPressed: () {
                           setState(() {
@@ -142,18 +200,25 @@ class _SignupPageState extends State<SignupPage> {
                       ),
                     ),
                     validator: (value) {
+                      if (value == null || value.isEmpty) {
+                        return "Veuillez confirmer votre mot de passe";
+                      }
                       if (value != _passwordController.text) {
-                        return "Passwords don’t match";
+                        return "Les mots de passe ne correspondent pas";
                       }
                       return null;
                     },
                   ),
-                  const SizedBox(height: 25),
+                  const SizedBox(height: 30),
 
-                  // ✅ When clicked, go to HomePage
+                  // Bouton Créer un compte
                   ElevatedButton(
                     onPressed: () {
                       if (_formKey.currentState!.validate()) {
+                        appState.login(
+                          name: _nameController.text.trim(),
+                          email: _emailController.text.trim(),
+                        );
                         Navigator.pushReplacement(
                           context,
                           MaterialPageRoute(
@@ -162,23 +227,27 @@ class _SignupPageState extends State<SignupPage> {
                       }
                     },
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.green,
+                      backgroundColor: mainGreen,
                       minimumSize: const Size(double.infinity, 50),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(30),
                       ),
                     ),
                     child: const Text(
-                      "Create Account",
-                      style: TextStyle(color: Colors.white, fontSize: 16),
+                      "Créer un compte",
+                      style:
+                      TextStyle(color: Colors.white, fontSize: 15),
                     ),
                   ),
-                  const SizedBox(height: 20),
+                  const SizedBox(height: 16),
 
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
+                  // Déjà un compte ?
+                  Wrap(
+                    alignment: WrapAlignment.center,
                     children: [
-                      const Text("Already have an account?"),
+                      Text("Vous avez déjà un compte ? ",
+                          style: TextStyle(
+                              fontSize: 13, color: textColor)),
                       TextButton(
                         onPressed: () {
                           Navigator.pushReplacement(
@@ -187,8 +256,9 @@ class _SignupPageState extends State<SignupPage> {
                                 builder: (_) => const LoginPage()),
                           );
                         },
-                        child: const Text("Sign In here",
-                            style: TextStyle(color: Colors.green)),
+                        child: Text("Connectez-vous ici",
+                            style: TextStyle(
+                                color: mainGreen, fontSize: 13)),
                       ),
                     ],
                   ),
@@ -201,4 +271,6 @@ class _SignupPageState extends State<SignupPage> {
     );
   }
 }
+
+
 

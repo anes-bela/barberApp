@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
-import 'signup_page.dart';
+import 'package:gestion_jr/screens/ForgotPassword_page.dart';
+import 'package:provider/provider.dart';
+import '../providers/app_state.dart';
 import '../main.dart';
+import 'signup_page.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -12,13 +15,21 @@ class LoginPage extends StatefulWidget {
 class _LoginPageState extends State<LoginPage> {
   final _formKey = GlobalKey<FormState>();
   bool _obscurePassword = true;
+  bool _rememberMe = false;
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
 
   @override
   Widget build(BuildContext context) {
+    final appState = Provider.of<AppState>(context);
+    final bool darkMode = appState.isDarkMode;
+    final Color backgroundColor = darkMode ? Colors.black : Colors.white;
+    final Color textColor = darkMode ? Colors.white : Colors.black;
+    final Color fieldColor = darkMode ? Colors.grey[800]! : Colors.white;
+    final Color mainGreen = const Color(0xFF4CAF50);
+
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: backgroundColor,
       body: Padding(
         padding: const EdgeInsets.all(24.0),
         child: Center(
@@ -28,35 +39,49 @@ class _LoginPageState extends State<LoginPage> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
-                  const Text(
-                    "Log in",
-                    style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold),
+                  Text(
+                    "Se connecter",
+                    style: TextStyle(
+                      fontSize: 26,
+                      fontWeight: FontWeight.bold,
+                      color: textColor,
+                    ),
                   ),
                   const SizedBox(height: 8),
-                  const Text(
-                    "Enter your email and password to securely access your account.",
+                  Text(
+                    "Entrez votre e-mail et mot de passe pour accéder à votre compte.",
                     textAlign: TextAlign.center,
-                    style: TextStyle(color: Colors.grey),
+                    style: TextStyle(
+                        fontSize: 13,
+                        color: darkMode ? Colors.grey[400] : Colors.grey),
                   ),
                   const SizedBox(height: 40),
 
                   // Email
                   TextFormField(
                     controller: _emailController,
-                    decoration: const InputDecoration(
-                      prefixIcon: Icon(Icons.email_outlined),
-                      labelText: "Email address",
+                    style: TextStyle(color: textColor),
+                    decoration: InputDecoration(
+                      filled: true,
+                      fillColor: fieldColor,
+                      prefixIcon:
+                      Icon(Icons.email_outlined, color: mainGreen),
+                      labelText: "Adresse e-mail",
+                      labelStyle: TextStyle(
+                          color: darkMode
+                              ? Colors.grey[300]
+                              : Colors.grey[700]),
                       border: OutlineInputBorder(
-                        borderRadius: BorderRadius.all(Radius.circular(30)),
+                        borderRadius: BorderRadius.circular(30),
                       ),
                     ),
                     validator: (value) {
                       if (value == null || value.isEmpty) {
-                        return "Please enter your email";
+                        return "Veuillez entrer votre adresse e-mail";
                       }
                       if (!RegExp(r'^[\w-.]+@([\w-]+\.)+[\w-]{2,4}$')
                           .hasMatch(value)) {
-                        return "Enter a valid email";
+                        return "Entrez une adresse e-mail valide";
                       }
                       return null;
                     },
@@ -67,17 +92,28 @@ class _LoginPageState extends State<LoginPage> {
                   TextFormField(
                     controller: _passwordController,
                     obscureText: _obscurePassword,
+                    style: TextStyle(color: textColor),
                     decoration: InputDecoration(
-                      prefixIcon: const Icon(Icons.lock_outline),
-                      labelText: "Password",
-                      border: const OutlineInputBorder(
-                          borderRadius:
-                          BorderRadius.all(Radius.circular(30))),
+                      filled: true,
+                      fillColor: fieldColor,
+                      prefixIcon:
+                      Icon(Icons.lock_outline, color: mainGreen),
+                      labelText: "Mot de passe",
+                      labelStyle: TextStyle(
+                          color: darkMode
+                              ? Colors.grey[300]
+                              : Colors.grey[700]),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(30),
+                      ),
                       suffixIcon: IconButton(
                         icon: Icon(
                           _obscurePassword
                               ? Icons.visibility_off
                               : Icons.visibility,
+                          color: darkMode
+                              ? Colors.grey[400]
+                              : Colors.grey[700],
                         ),
                         onPressed: () {
                           setState(() {
@@ -88,21 +124,65 @@ class _LoginPageState extends State<LoginPage> {
                     ),
                     validator: (value) {
                       if (value == null || value.isEmpty) {
-                        return "Please enter your password";
+                        return "Veuillez entrer votre mot de passe";
                       }
                       if (value.length < 6) {
-                        return "Password must be at least 6 characters";
+                        return "Le mot de passe doit contenir au moins 6 caractères";
                       }
                       return null;
                     },
                   ),
-                  const SizedBox(height: 20),
 
-                  // 🔹 Login button
+                  const SizedBox(height: 10),
+
+                  // Remember me & Forgot password
+                  Wrap(
+                    alignment: WrapAlignment.spaceBetween,
+                    crossAxisAlignment: WrapCrossAlignment.center,
+                    spacing: 8,
+                    runSpacing: 4,
+                    children: [
+                      Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Checkbox(
+                            value: _rememberMe,
+                            activeColor: mainGreen,
+                            onChanged: (value) {
+                              setState(() {
+                                _rememberMe = value ?? false;
+                              });
+                            },
+                          ),
+                          Text(
+                            "Se souvenir de moi",
+                            style: TextStyle(
+                                fontSize: 13, color: textColor),
+                          ),
+                        ],
+                      ),
+              TextButton(
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (_) => const ForgotPasswordPage()),
+                  );
+                },
+              child: Text(
+                          "Mot de passe oublié ?",
+                          style: TextStyle(
+                              color: mainGreen, fontSize: 13),
+                        ),
+                      ),
+                    ],
+                  ),
+
+                  const SizedBox(height: 10),
+
+                  // Login button
                   ElevatedButton(
                     onPressed: () {
                       if (_formKey.currentState!.validate()) {
-                        // ✅ Go to HomePage
                         Navigator.pushReplacement(
                           context,
                           MaterialPageRoute(
@@ -111,19 +191,22 @@ class _LoginPageState extends State<LoginPage> {
                       }
                     },
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.green,
+                      backgroundColor: mainGreen,
                       minimumSize: const Size(double.infinity, 50),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(30),
                       ),
                     ),
-                    child: const Text("Login",
-                        style: TextStyle(color: Colors.white, fontSize: 16)),
+                    child: const Text(
+                      "Se connecter",
+                      style:
+                      TextStyle(color: Colors.white, fontSize: 15),
+                    ),
                   ),
 
                   const SizedBox(height: 16),
 
-                  // 🔹 Continue without account
+                  // Continue without account
                   TextButton(
                     onPressed: () {
                       Navigator.pushReplacement(
@@ -132,11 +215,11 @@ class _LoginPageState extends State<LoginPage> {
                             builder: (_) => const MainScaffold()),
                       );
                     },
-                    child: const Text(
-                      "Continue without account",
+                    child: Text(
+                      "Continuer sans compte",
                       style: TextStyle(
-                        color: Colors.green,
-                        fontSize: 16,
+                        color: mainGreen,
+                        fontSize: 14,
                         fontWeight: FontWeight.w500,
                       ),
                     ),
@@ -144,11 +227,13 @@ class _LoginPageState extends State<LoginPage> {
 
                   const SizedBox(height: 20),
 
-                  // 🔹 Sign up link
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
+                  // Sign up link
+                  Wrap(
+                    alignment: WrapAlignment.center,
                     children: [
-                      const Text("Don’t have an account?"),
+                      Text("Vous n’avez pas de compte ? ",
+                          style: TextStyle(
+                              fontSize: 13, color: textColor)),
                       TextButton(
                         onPressed: () {
                           Navigator.push(
@@ -157,8 +242,9 @@ class _LoginPageState extends State<LoginPage> {
                                 builder: (_) => const SignupPage()),
                           );
                         },
-                        child: const Text("Sign Up here",
-                            style: TextStyle(color: Colors.green)),
+                        child: Text("Inscrivez-vous ici",
+                            style: TextStyle(
+                                color: mainGreen, fontSize: 13)),
                       ),
                     ],
                   ),
@@ -171,4 +257,6 @@ class _LoginPageState extends State<LoginPage> {
     );
   }
 }
+
+
 
