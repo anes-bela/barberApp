@@ -63,10 +63,8 @@ class _AddCutScreenState extends State<AddCutScreen> {
                     decoration: InputDecoration(
                       labelText: 'Prix de la coupe (DA)',
                       border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(8),
+                        borderRadius: BorderRadius.circular(12),
                       ),
-                      filled: true,
-                      fillColor: Colors.grey[50],
                     ),
                     validator: (v) {
                       if (v == null || v.isEmpty) return 'Entrer un prix';
@@ -83,10 +81,8 @@ class _AddCutScreenState extends State<AddCutScreen> {
                       labelText:
                           'Mon % (par défaut ${appState.defaultPercent}%)',
                       border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(8),
+                        borderRadius: BorderRadius.circular(12),
                       ),
-                      filled: true,
-                      fillColor: Colors.grey[50],
                     ),
                     validator: (v) {
                       if (v == null || v.isEmpty)
@@ -104,10 +100,8 @@ class _AddCutScreenState extends State<AddCutScreen> {
                     decoration: InputDecoration(
                       labelText: 'Service (optionnel, ex: Dégradé + barbe)',
                       border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(8),
+                        borderRadius: BorderRadius.circular(12),
                       ),
-                      filled: true,
-                      fillColor: Colors.grey[50],
                     ),
                   ),
                   const SizedBox(height: 18),
@@ -117,8 +111,14 @@ class _AddCutScreenState extends State<AddCutScreen> {
                     elevation: 2,
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(16),
+                      side: BorderSide(
+                        color: Theme.of(context).brightness == Brightness.dark
+                            ? Colors.white24      // bordure claire en mode sombre
+                            : Colors.black26,      // bordure foncée en mode clair
+                        width: 1.5,
+                      ),
                     ),
-                    color: Colors.green[50],
+                    color: Theme.of(context).cardColor,
                     child: Padding(
                       padding: const EdgeInsets.all(16.0),
                       child: Column(

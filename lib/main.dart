@@ -29,6 +29,7 @@ class MyApp extends StatelessWidget {
           // 🌙 Mode clair/sombre dynamique
           themeMode: appState.isDarkMode ? ThemeMode.dark : ThemeMode.light,
 
+          // 🌞 Thème clair
           theme: ThemeData(
             useMaterial3: true,
             colorScheme: ColorScheme.fromSeed(
@@ -46,6 +47,13 @@ class MyApp extends StatelessWidget {
               foregroundColor: Colors.white,
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(16),
+              ),
+            ),
+            cardTheme: CardTheme( // ← Ajouté
+              color: Colors.grey[100],
+              elevation: 4,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
               ),
             ),
           ),
@@ -67,6 +75,13 @@ class MyApp extends StatelessWidget {
               backgroundColor: Colors.black,
               selectedItemColor: Colors.green,
               unselectedItemColor: Colors.grey,
+            ),
+            cardTheme: CardTheme( // ← Ajouté
+              color: Colors.grey[900],
+              elevation: 4,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
             ),
           ),
 

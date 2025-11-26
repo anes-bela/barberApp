@@ -12,6 +12,10 @@ class HomeScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final appState = Provider.of<AppState>(context);
 
+    // 🔥 Ajouté : détecter mode sombre
+    final bool darkMode = Theme.of(context).brightness == Brightness.dark;
+    final Color textColor = darkMode ? Colors.white : Colors.black;
+
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 16),
       child: Column(
@@ -26,29 +30,49 @@ class HomeScreen extends StatelessWidget {
                 letterSpacing: 1.0,
               )),
           const SizedBox(height: 18),
+
+          // 🔥🔥🔥 CARD MODIFIÉE 🔥🔥🔥
           Card(
             elevation: 2,
-            shape:
-                RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-            color: Colors.green[50],
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(16),
+            ),
+            color: darkMode ? Colors.grey[900] : Colors.green[50],  // <-- ici
             child: Padding(
               padding: const EdgeInsets.all(20.0),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text('Total encaissé : ${appState.currentDay.total} DA',
-                      style: const TextStyle(
-                          fontSize: 18, fontWeight: FontWeight.w600)),
+                  Text(
+                    'Total encaissé : ${appState.currentDay.total} DA',
+                    style: TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.w600,
+                      color: textColor, // <-- couleur adaptée
+                    ),
+                  ),
                   const SizedBox(height: 8),
-                  Text('Ma part : ${appState.currentDay.myShare} DA',
-                      style: const TextStyle(fontSize: 16)),
+                  Text(
+                    'Ma part : ${appState.currentDay.myShare} DA',
+                    style: TextStyle(
+                      fontSize: 16,
+                      color: textColor.withOpacity(0.85), // <-- adapté
+                    ),
+                  ),
                   const SizedBox(height: 6),
-                  Text('Patron : ${appState.currentDay.bossShare} DA',
-                      style: const TextStyle(fontSize: 16)),
+                  Text(
+                    'Patron : ${appState.currentDay.bossShare} DA',
+                    style: TextStyle(
+                      fontSize: 16,
+                      color: textColor.withOpacity(0.85), // <-- adapté
+                    ),
+                  ),
                 ],
               ),
             ),
           ),
+          // 🔥🔥🔥 FIN DES MODIFS 🔥🔥🔥
+
           const SizedBox(height: 20),
           ElevatedButton.icon(
             onPressed: () => Navigator.of(context)
@@ -81,7 +105,7 @@ class HomeScreen extends StatelessWidget {
             child: const Padding(
               padding: EdgeInsets.symmetric(vertical: 12.0),
               child:
-                  Text('Clôturer la journée', style: TextStyle(fontSize: 16)),
+              Text('Clôturer la journée', style: TextStyle(fontSize: 16)),
             ),
           ),
           const SizedBox(height: 18),
@@ -94,31 +118,31 @@ class HomeScreen extends StatelessWidget {
           Expanded(
             child: appState.currentDay.cuts.isEmpty
                 ? const Center(
-                    child: Text('Aucune coupe enregistrée aujourd\'hui'))
+                child: Text('Aucune coupe enregistrée aujourd\'hui'))
                 : ListView.separated(
-                    itemCount: appState.currentDay.cuts.length,
-                    separatorBuilder: (_, __) => const Divider(),
-                    itemBuilder: (ctx, i) {
-                      final c = appState.currentDay.cuts[
-                          appState.currentDay.cuts.length -
-                              1 -
-                              i]; // recent first
-                      final my = (c.price * c.percent) ~/ 100;
-                      final boss = c.price - my;
-                      return CutTile(
-                        cut: c,
-                        onDelete: () {
-                          // delete by index: compute original index
-                          final originalIndex =
-                              appState.currentDay.cuts.length - 1 - i;
-                          appState.removeCut(originalIndex);
-                        },
-                      );
-                    },
-                  ),
+              itemCount: appState.currentDay.cuts.length,
+              separatorBuilder: (_, __) => const Divider(),
+              itemBuilder: (ctx, i) {
+                final c = appState.currentDay.cuts[
+                appState.currentDay.cuts.length -
+                    1 -
+                    i]; // recent first
+                final my = (c.price * c.percent) ~/ 100;
+                final boss = c.price - my;
+                return CutTile(
+                  cut: c,
+                  onDelete: () {
+                    final originalIndex =
+                        appState.currentDay.cuts.length - 1 - i;
+                    appState.removeCut(originalIndex);
+                  },
+                );
+              },
+            ),
           ),
         ],
       ),
     );
   }
 }
+

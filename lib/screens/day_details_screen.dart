@@ -103,9 +103,9 @@ class DayDetailsScreen extends StatelessWidget {
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
                         Text('Total:',
-                            style: TextStyle(fontWeight: FontWeight.w500)),
+                            style: TextStyle(fontWeight: FontWeight.w500 , color: Colors.grey[600])),
                         Text('${day.total} DA',
-                            style: TextStyle(fontWeight: FontWeight.bold)),
+                            style: TextStyle(fontWeight: FontWeight.bold,color: Colors.grey[600])),
                       ],
                     ),
                     const SizedBox(height: 8),
