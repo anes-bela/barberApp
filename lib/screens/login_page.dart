@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:gestion_jr/screens/ForgotPassword_page.dart';
-import 'package:provider/provider.dart';
-import '../providers/app_state.dart';
 import '../main.dart';
 import 'signup_page.dart';
 
@@ -21,15 +19,10 @@ class _LoginPageState extends State<LoginPage> {
 
   @override
   Widget build(BuildContext context) {
-    final appState = Provider.of<AppState>(context);
-    final bool darkMode = appState.isDarkMode;
-    final Color backgroundColor = darkMode ? Colors.black : Colors.white;
-    final Color textColor = darkMode ? Colors.white : Colors.black;
-    final Color fieldColor = darkMode ? Colors.grey[800]! : Colors.white;
-    final Color mainGreen = const Color(0xFF4CAF50);
+    final cs = Theme.of(context).colorScheme;
 
     return Scaffold(
-      backgroundColor: backgroundColor,
+      backgroundColor: cs.background,
       body: Padding(
         padding: const EdgeInsets.all(24.0),
         child: Center(
@@ -44,33 +37,32 @@ class _LoginPageState extends State<LoginPage> {
                     style: TextStyle(
                       fontSize: 26,
                       fontWeight: FontWeight.bold,
-                      color: textColor,
+                      color: cs.onBackground,
                     ),
                   ),
                   const SizedBox(height: 8),
+
                   Text(
                     "Entrez votre e-mail et mot de passe pour accéder à votre compte.",
                     textAlign: TextAlign.center,
                     style: TextStyle(
-                        fontSize: 13,
-                        color: darkMode ? Colors.grey[400] : Colors.grey),
+                      fontSize: 13,
+                      color: cs.onBackground.withOpacity(0.7),
+                    ),
                   ),
+
                   const SizedBox(height: 40),
 
-                  // Email
+                  // EMAIL
                   TextFormField(
                     controller: _emailController,
-                    style: TextStyle(color: textColor),
+                    style: TextStyle(color: cs.onSurface),
                     decoration: InputDecoration(
                       filled: true,
-                      fillColor: fieldColor,
-                      prefixIcon:
-                      Icon(Icons.email_outlined, color: mainGreen),
+                      fillColor: cs.surface,
+                      prefixIcon: Icon(Icons.email_outlined, color: cs.primary),
                       labelText: "Adresse e-mail",
-                      labelStyle: TextStyle(
-                          color: darkMode
-                              ? Colors.grey[300]
-                              : Colors.grey[700]),
+                      labelStyle: TextStyle(color: cs.onSurface.withOpacity(0.7)),
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(30),
                       ),
@@ -86,23 +78,20 @@ class _LoginPageState extends State<LoginPage> {
                       return null;
                     },
                   ),
+
                   const SizedBox(height: 20),
 
-                  // Password
+                  // PASSWORD
                   TextFormField(
                     controller: _passwordController,
                     obscureText: _obscurePassword,
-                    style: TextStyle(color: textColor),
+                    style: TextStyle(color: cs.onSurface),
                     decoration: InputDecoration(
                       filled: true,
-                      fillColor: fieldColor,
-                      prefixIcon:
-                      Icon(Icons.lock_outline, color: mainGreen),
+                      fillColor: cs.surface,
+                      prefixIcon: Icon(Icons.lock_outline, color: cs.primary),
                       labelText: "Mot de passe",
-                      labelStyle: TextStyle(
-                          color: darkMode
-                              ? Colors.grey[300]
-                              : Colors.grey[700]),
+                      labelStyle: TextStyle(color: cs.onSurface.withOpacity(0.7)),
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(30),
                       ),
@@ -111,43 +100,26 @@ class _LoginPageState extends State<LoginPage> {
                           _obscurePassword
                               ? Icons.visibility_off
                               : Icons.visibility,
-                          color: darkMode
-                              ? Colors.grey[400]
-                              : Colors.grey[700],
+                          color: cs.onSurface.withOpacity(0.6),
                         ),
                         onPressed: () {
-                          setState(() {
-                            _obscurePassword = !_obscurePassword;
-                          });
+                          setState(() => _obscurePassword = !_obscurePassword);
                         },
                       ),
                     ),
-                    validator: (value) {
-                      if (value == null || value.isEmpty) {
-                        return "Veuillez entrer votre mot de passe";
-                      }
-                      if (value.length < 6) {
-                        return "Le mot de passe doit contenir au moins 6 caractères";
-                      }
-                      return null;
-                    },
                   ),
 
                   const SizedBox(height: 10),
 
-                  // Remember me & Forgot password
-                  Wrap(
-                    alignment: WrapAlignment.spaceBetween,
-                    crossAxisAlignment: WrapCrossAlignment.center,
-                    spacing: 8,
-                    runSpacing: 4,
+                  // REMEMBER + FORGOT PASSWORD
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       Row(
-                        mainAxisSize: MainAxisSize.min,
                         children: [
                           Checkbox(
                             value: _rememberMe,
-                            activeColor: mainGreen,
+                            activeColor: cs.primary,
                             onChanged: (value) {
                               setState(() {
                                 _rememberMe = value ?? false;
@@ -156,22 +128,21 @@ class _LoginPageState extends State<LoginPage> {
                           ),
                           Text(
                             "Se souvenir de moi",
-                            style: TextStyle(
-                                fontSize: 13, color: textColor),
+                            style: TextStyle(color: cs.onBackground),
                           ),
                         ],
                       ),
-              TextButton(
-                onPressed: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(builder: (_) => const ForgotPasswordPage()),
-                  );
-                },
-              child: Text(
+
+                      TextButton(
+                        onPressed: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(builder: (_) => const ForgotPasswordPage()),
+                          );
+                        },
+                        child: Text(
                           "Mot de passe oublié ?",
-                          style: TextStyle(
-                              color: mainGreen, fontSize: 13),
+                          style: TextStyle(color: cs.primary),
                         ),
                       ),
                     ],
@@ -179,72 +150,62 @@ class _LoginPageState extends State<LoginPage> {
 
                   const SizedBox(height: 10),
 
-                  // Login button
+                  // LOGIN BUTTON
                   ElevatedButton(
                     onPressed: () {
                       if (_formKey.currentState!.validate()) {
                         Navigator.pushReplacement(
                           context,
-                          MaterialPageRoute(
-                              builder: (_) => const MainScaffold()),
+                          MaterialPageRoute(builder: (_) => const MainScaffold()),
                         );
                       }
                     },
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: mainGreen,
                       minimumSize: const Size(double.infinity, 50),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(30),
                       ),
                     ),
-                    child: const Text(
-                      "Se connecter",
-                      style:
-                      TextStyle(color: Colors.white, fontSize: 15),
-                    ),
+                    child: const Text("Se connecter", style: TextStyle(fontSize: 15)),
                   ),
 
                   const SizedBox(height: 16),
 
-                  // Continue without account
+                  // CONTINUE WITHOUT ACCOUNT
                   TextButton(
                     onPressed: () {
                       Navigator.pushReplacement(
                         context,
-                        MaterialPageRoute(
-                            builder: (_) => const MainScaffold()),
+                        MaterialPageRoute(builder: (_) => const MainScaffold()),
                       );
                     },
                     child: Text(
                       "Continuer sans compte",
-                      style: TextStyle(
-                        color: mainGreen,
-                        fontSize: 14,
-                        fontWeight: FontWeight.w500,
-                      ),
+                      style: TextStyle(color: cs.primary, fontSize: 14),
                     ),
                   ),
 
                   const SizedBox(height: 20),
 
-                  // Sign up link
-                  Wrap(
-                    alignment: WrapAlignment.center,
+                  // SIGNUP LINE (SAME ROW)
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      Text("Vous n’avez pas de compte ? ",
-                          style: TextStyle(
-                              fontSize: 13, color: textColor)),
+                      Text(
+                        "Vous n’avez pas de compte ? ",
+                        style: TextStyle(color: cs.onBackground, fontSize: 13),
+                      ),
                       TextButton(
                         onPressed: () {
                           Navigator.push(
                             context,
-                            MaterialPageRoute(
-                                builder: (_) => const SignupPage()),
+                            MaterialPageRoute(builder: (_) => const SignupPage()),
                           );
                         },
-                        child: Text("Inscrivez-vous ici",
-                            style: TextStyle(
-                                color: mainGreen, fontSize: 13)),
+                        child: Text(
+                          "Inscrivez-vous ici",
+                          style: TextStyle(color: cs.primary, fontSize: 13),
+                        ),
                       ),
                     ],
                   ),
@@ -257,6 +218,3 @@ class _LoginPageState extends State<LoginPage> {
     );
   }
 }
-
-
-

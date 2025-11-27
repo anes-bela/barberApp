@@ -297,13 +297,13 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   ScaffoldMessenger.of(context).showSnackBar(SnackBar(
                     content:
                         Text('✅ Paramètres sauvegardés - $percent% défini'),
-                    backgroundColor: Colors.green,
+                    //backgroundColor: Colors.green,
                     duration: const Duration(seconds: 2),
                   ));
                 },
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.green,
-                  foregroundColor: Colors.white,
+                  //backgroundColor: Colors.green,
+                  //foregroundColor: Colors.white,
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(12),
                   ),

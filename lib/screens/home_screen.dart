@@ -12,10 +12,6 @@ class HomeScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final appState = Provider.of<AppState>(context);
 
-    // 🔥 Ajouté : détecter mode sombre
-    final bool darkMode = Theme.of(context).brightness == Brightness.dark;
-    final Color textColor = darkMode ? Colors.white : Colors.black;
-
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 16),
       child: Column(
@@ -30,49 +26,28 @@ class HomeScreen extends StatelessWidget {
                 letterSpacing: 1.0,
               )),
           const SizedBox(height: 18),
-
-          // 🔥🔥🔥 CARD MODIFIÉE 🔥🔥🔥
           Card(
             elevation: 2,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(16),
-            ),
-            color: darkMode ? Colors.grey[900] : Colors.green[50],  // <-- ici
+            shape:
+            RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
             child: Padding(
               padding: const EdgeInsets.all(20.0),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(
-                    'Total encaissé : ${appState.currentDay.total} DA',
-                    style: TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.w600,
-                      color: textColor, // <-- couleur adaptée
-                    ),
-                  ),
+                  Text('Total encaissé : ${appState.currentDay.total} DA',
+                      style: const TextStyle(
+                          fontSize: 18, fontWeight: FontWeight.w600)),
                   const SizedBox(height: 8),
-                  Text(
-                    'Ma part : ${appState.currentDay.myShare} DA',
-                    style: TextStyle(
-                      fontSize: 16,
-                      color: textColor.withOpacity(0.85), // <-- adapté
-                    ),
-                  ),
+                  Text('Ma part : ${appState.currentDay.myShare} DA',
+                      style: const TextStyle(fontSize: 16)),
                   const SizedBox(height: 6),
-                  Text(
-                    'Patron : ${appState.currentDay.bossShare} DA',
-                    style: TextStyle(
-                      fontSize: 16,
-                      color: textColor.withOpacity(0.85), // <-- adapté
-                    ),
-                  ),
+                  Text('Patron : ${appState.currentDay.bossShare} DA',
+                      style: const TextStyle(fontSize: 16)),
                 ],
               ),
             ),
           ),
-          // 🔥🔥🔥 FIN DES MODIFS 🔥🔥🔥
-
           const SizedBox(height: 20),
           ElevatedButton.icon(
             onPressed: () => Navigator.of(context)
@@ -83,8 +58,8 @@ class HomeScreen extends StatelessWidget {
               child: Text('Ajouter une coupe', style: TextStyle(fontSize: 16)),
             ),
             style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.green,
-                foregroundColor: Colors.white,
+                //backgroundColor: Colors.green,
+                //foregroundColor: Colors.white,
                 shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(12)),
                 elevation: 2,
@@ -98,7 +73,7 @@ class HomeScreen extends StatelessWidget {
                   const SnackBar(content: Text('Journée clôturée')));
             },
             style: OutlinedButton.styleFrom(
-                side: BorderSide(color: Colors.green),
+                //side: BorderSide(color: Colors.green),
                 shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(12)),
                 minimumSize: const Size.fromHeight(48)),
@@ -132,6 +107,7 @@ class HomeScreen extends StatelessWidget {
                 return CutTile(
                   cut: c,
                   onDelete: () {
+                    // delete by index: compute original index
                     final originalIndex =
                         appState.currentDay.cuts.length - 1 - i;
                     appState.removeCut(originalIndex);
@@ -145,4 +121,3 @@ class HomeScreen extends StatelessWidget {
     );
   }
 }
-

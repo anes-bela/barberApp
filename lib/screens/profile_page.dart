@@ -94,14 +94,14 @@ class _ProfilePageState extends State<ProfilePage> {
                       );
                     },
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: mainGreen,
+                      //backgroundColor: mainGreen,
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(30),
                       ),
                     ),
                     child: const Text(
                       "Se connecter / Créer un compte",
-                      style: TextStyle(color: Colors.white),
+                      //style: TextStyle(color: Colors.white),
                     ),
                   ),
                 ],

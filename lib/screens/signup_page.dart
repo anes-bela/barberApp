@@ -19,20 +19,14 @@ class _SignupPageState extends State<SignupPage> {
   final TextEditingController _nameController = TextEditingController();
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
-  final TextEditingController _confirmPasswordController =
-  TextEditingController();
+  final TextEditingController _confirmPasswordController = TextEditingController();
 
   @override
   Widget build(BuildContext context) {
-    final appState = Provider.of<AppState>(context);
-    final bool darkMode = appState.isDarkMode;
-    final Color backgroundColor = darkMode ? Colors.black : Colors.white;
-    final Color textColor = darkMode ? Colors.white : Colors.black;
-    final Color fieldColor = darkMode ? Colors.grey[800]! : Colors.white;
-    final Color mainGreen = const Color(0xFF4CAF50);
+    final cs = Theme.of(context).colorScheme;
 
     return Scaffold(
-      backgroundColor: backgroundColor,
+      backgroundColor: cs.background,
       body: Padding(
         padding: const EdgeInsets.all(24.0),
         child: Center(
@@ -47,33 +41,32 @@ class _SignupPageState extends State<SignupPage> {
                     style: TextStyle(
                       fontSize: 26,
                       fontWeight: FontWeight.bold,
-                      color: textColor,
+                      color: cs.onBackground,
                     ),
                   ),
                   const SizedBox(height: 8),
+
                   Text(
                     "Créez un compte pour profiter de toutes les fonctionnalités.",
                     textAlign: TextAlign.center,
                     style: TextStyle(
-                        fontSize: 13,
-                        color: darkMode ? Colors.grey[400] : Colors.grey),
+                      fontSize: 13,
+                      color: cs.onBackground.withOpacity(0.7),
+                    ),
                   ),
+
                   const SizedBox(height: 40),
 
-                  // Nom complet
+                  // NOM COMPLET
                   TextFormField(
                     controller: _nameController,
-                    style: TextStyle(color: textColor),
+                    style: TextStyle(color: cs.onSurface),
                     decoration: InputDecoration(
                       filled: true,
-                      fillColor: fieldColor,
-                      prefixIcon:
-                      Icon(Icons.person_outline, color: mainGreen),
+                      fillColor: cs.surface,
+                      prefixIcon: Icon(Icons.person_outline, color: cs.primary),
                       labelText: "Nom complet",
-                      labelStyle: TextStyle(
-                          color: darkMode
-                              ? Colors.grey[300]
-                              : Colors.grey[700]),
+                      labelStyle: TextStyle(color: cs.onSurface.withOpacity(0.7)),
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(30),
                       ),
@@ -85,22 +78,19 @@ class _SignupPageState extends State<SignupPage> {
                       return null;
                     },
                   ),
+
                   const SizedBox(height: 20),
 
-                  // Email
+                  // EMAIL
                   TextFormField(
                     controller: _emailController,
-                    style: TextStyle(color: textColor),
+                    style: TextStyle(color: cs.onSurface),
                     decoration: InputDecoration(
                       filled: true,
-                      fillColor: fieldColor,
-                      prefixIcon:
-                      Icon(Icons.email_outlined, color: mainGreen),
+                      fillColor: cs.surface,
+                      prefixIcon: Icon(Icons.email_outlined, color: cs.primary),
                       labelText: "Adresse e-mail",
-                      labelStyle: TextStyle(
-                          color: darkMode
-                              ? Colors.grey[300]
-                              : Colors.grey[700]),
+                      labelStyle: TextStyle(color: cs.onSurface.withOpacity(0.7)),
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(30),
                       ),
@@ -116,23 +106,20 @@ class _SignupPageState extends State<SignupPage> {
                       return null;
                     },
                   ),
+
                   const SizedBox(height: 20),
 
-                  // Mot de passe
+                  // MOT DE PASSE
                   TextFormField(
                     controller: _passwordController,
                     obscureText: _obscurePassword,
-                    style: TextStyle(color: textColor),
+                    style: TextStyle(color: cs.onSurface),
                     decoration: InputDecoration(
                       filled: true,
-                      fillColor: fieldColor,
-                      prefixIcon:
-                      Icon(Icons.lock_outline, color: mainGreen),
+                      fillColor: cs.surface,
+                      prefixIcon: Icon(Icons.lock_outline, color: cs.primary),
                       labelText: "Mot de passe",
-                      labelStyle: TextStyle(
-                          color: darkMode
-                              ? Colors.grey[300]
-                              : Colors.grey[700]),
+                      labelStyle: TextStyle(color: cs.onSurface.withOpacity(0.7)),
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(30),
                       ),
@@ -141,14 +128,10 @@ class _SignupPageState extends State<SignupPage> {
                           _obscurePassword
                               ? Icons.visibility_off
                               : Icons.visibility,
-                          color: darkMode
-                              ? Colors.grey[400]
-                              : Colors.grey[700],
+                          color: cs.onSurface.withOpacity(0.6),
                         ),
                         onPressed: () {
-                          setState(() {
-                            _obscurePassword = !_obscurePassword;
-                          });
+                          setState(() => _obscurePassword = !_obscurePassword);
                         },
                       ),
                     ),
@@ -162,23 +145,20 @@ class _SignupPageState extends State<SignupPage> {
                       return null;
                     },
                   ),
+
                   const SizedBox(height: 20),
 
-                  // Confirmer mot de passe
+                  // CONFIRMER MOT DE PASSE
                   TextFormField(
                     controller: _confirmPasswordController,
                     obscureText: _obscureConfirmPassword,
-                    style: TextStyle(color: textColor),
+                    style: TextStyle(color: cs.onSurface),
                     decoration: InputDecoration(
                       filled: true,
-                      fillColor: fieldColor,
-                      prefixIcon:
-                      Icon(Icons.lock_outline, color: mainGreen),
+                      fillColor: cs.surface,
+                      prefixIcon: Icon(Icons.lock_outline, color: cs.primary),
                       labelText: "Confirmer le mot de passe",
-                      labelStyle: TextStyle(
-                          color: darkMode
-                              ? Colors.grey[300]
-                              : Colors.grey[700]),
+                      labelStyle: TextStyle(color: cs.onSurface.withOpacity(0.7)),
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(30),
                       ),
@@ -187,15 +167,10 @@ class _SignupPageState extends State<SignupPage> {
                           _obscureConfirmPassword
                               ? Icons.visibility_off
                               : Icons.visibility,
-                          color: darkMode
-                              ? Colors.grey[400]
-                              : Colors.grey[700],
+                          color: cs.onSurface.withOpacity(0.6),
                         ),
                         onPressed: () {
-                          setState(() {
-                            _obscureConfirmPassword =
-                            !_obscureConfirmPassword;
-                          });
+                          setState(() => _obscureConfirmPassword = !_obscureConfirmPassword);
                         },
                       ),
                     ),
@@ -209,56 +184,56 @@ class _SignupPageState extends State<SignupPage> {
                       return null;
                     },
                   ),
+
                   const SizedBox(height: 30),
 
-                  // Bouton Créer un compte
+                  // BOUTON CRÉER UN COMPTE
                   ElevatedButton(
                     onPressed: () {
                       if (_formKey.currentState!.validate()) {
-                        appState.login(
+                        Provider.of<AppState>(context, listen: false).login(
                           name: _nameController.text.trim(),
                           email: _emailController.text.trim(),
                         );
+
                         Navigator.pushReplacement(
                           context,
-                          MaterialPageRoute(
-                              builder: (_) => const MainScaffold()),
+                          MaterialPageRoute(builder: (_) => const MainScaffold()),
                         );
                       }
                     },
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: mainGreen,
                       minimumSize: const Size(double.infinity, 50),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(30),
                       ),
                     ),
-                    child: const Text(
-                      "Créer un compte",
-                      style:
-                      TextStyle(color: Colors.white, fontSize: 15),
-                    ),
+                    child: const Text("Créer un compte", style: TextStyle(fontSize: 15)),
                   ),
+
                   const SizedBox(height: 16),
 
-                  // Déjà un compte ?
-                  Wrap(
-                    alignment: WrapAlignment.center,
+                  // ————————————————
+                  //   DÉJÀ UN COMPTE ? (UNE SEULE LIGNE)
+                  // ————————————————
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      Text("Vous avez déjà un compte ? ",
-                          style: TextStyle(
-                              fontSize: 13, color: textColor)),
+                      Text(
+                        "Vous avez déjà un compte ? ",
+                        style: TextStyle(fontSize: 13, color: cs.onBackground),
+                      ),
                       TextButton(
                         onPressed: () {
                           Navigator.pushReplacement(
                             context,
-                            MaterialPageRoute(
-                                builder: (_) => const LoginPage()),
+                            MaterialPageRoute(builder: (_) => const LoginPage()),
                           );
                         },
-                        child: Text("Connectez-vous ici",
-                            style: TextStyle(
-                                color: mainGreen, fontSize: 13)),
+                        child: Text(
+                          "Connectez-vous ici",
+                          style: TextStyle(color: cs.primary, fontSize: 13),
+                        ),
                       ),
                     ],
                   ),
@@ -271,6 +246,3 @@ class _SignupPageState extends State<SignupPage> {
     );
   }
 }
-
-
-

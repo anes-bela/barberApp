@@ -26,22 +26,24 @@ class MyApp extends StatelessWidget {
           debugShowCheckedModeBanner: false,
           title: 'Coiffeassy',
 
-          // 🌙 Mode clair/sombre dynamique
+          // 🌙 Mode clair / sombre dynamique
           themeMode: appState.isDarkMode ? ThemeMode.dark : ThemeMode.light,
 
-          // 🌞 Thème clair
+          // 🌞 Thème CLAIR
           theme: ThemeData(
             useMaterial3: true,
             colorScheme: ColorScheme.fromSeed(
               seedColor: Colors.green,
               brightness: Brightness.light,
             ),
+
             appBarTheme: const AppBarTheme(
               backgroundColor: Colors.green,
               foregroundColor: Colors.white,
               elevation: 0,
               centerTitle: true,
             ),
+
             floatingActionButtonTheme: FloatingActionButtonThemeData(
               backgroundColor: Colors.green,
               foregroundColor: Colors.white,
@@ -49,43 +51,83 @@ class MyApp extends StatelessWidget {
                 borderRadius: BorderRadius.circular(16),
               ),
             ),
-            cardTheme: CardTheme( // ← Ajouté
-              color: Colors.grey[100],
+
+            cardTheme: CardTheme(
+              color: Colors.green[50],
               elevation: 4,
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(12),
               ),
             ),
+
+            // 🔵 ElevatedButton - Light
+            elevatedButtonTheme: ElevatedButtonThemeData(
+              style: ButtonStyle(
+                backgroundColor: MaterialStateProperty.all(Colors.green),
+                foregroundColor: MaterialStateProperty.all(Colors.white),
+              ),
+            ),
+
+            // 🟢 OutlinedButton - Light
+            outlinedButtonTheme: OutlinedButtonThemeData(
+              style: ButtonStyle(
+                side: MaterialStateProperty.all(
+                  const BorderSide(color: Colors.green),
+                ),
+                foregroundColor: MaterialStateProperty.all(Colors.green),
+              ),
+            ),
           ),
 
-          // 🌑 Thème sombre
+          // 🌑 Thème SOMBRE
           darkTheme: ThemeData(
             useMaterial3: true,
             colorScheme: ColorScheme.fromSeed(
-              seedColor: Colors.green,
+              seedColor: const Color(0xFF2E7D32),
               brightness: Brightness.dark,
             ),
+
             appBarTheme: const AppBarTheme(
               backgroundColor: Colors.black,
               foregroundColor: Colors.white,
               elevation: 0,
               centerTitle: true,
             ),
+
             bottomNavigationBarTheme: const BottomNavigationBarThemeData(
               backgroundColor: Colors.black,
               selectedItemColor: Colors.green,
               unselectedItemColor: Colors.grey,
             ),
-            cardTheme: CardTheme( // ← Ajouté
+
+            cardTheme: CardTheme(
               color: Colors.grey[900],
               elevation: 4,
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(12),
               ),
             ),
+
+            // 🔵 ElevatedButton - Dark
+            elevatedButtonTheme: ElevatedButtonThemeData(
+              style: ButtonStyle(
+                backgroundColor: MaterialStateProperty.all(Colors.green[700]),
+                foregroundColor: MaterialStateProperty.all(Colors.white),
+              ),
+            ),
+
+            // 🟢 OutlinedButton - Dark
+            outlinedButtonTheme: OutlinedButtonThemeData(
+              style: ButtonStyle(
+                side: MaterialStateProperty.all(
+                  BorderSide(color: Colors.green[700]!, width: 2),
+                ),
+                foregroundColor: MaterialStateProperty.all(Colors.green[300]),
+              ),
+            ),
           ),
 
-          // 🏁 Première page : Splash
+          // 🏁 Première page : SplashScreen
           home: const SplashScreen(),
         );
       },
@@ -118,6 +160,7 @@ class _MainScaffoldState extends State<MainScaffold> {
 
     return Scaffold(
       body: SafeArea(child: _pages[_selectedIndex]),
+
       bottomNavigationBar: BottomNavigationBar(
         currentIndex: _selectedIndex,
         onTap: _onNavTap,
@@ -150,6 +193,7 @@ class _MainScaffoldState extends State<MainScaffold> {
           ),
         ],
       ),
+
       floatingActionButton: _selectedIndex == 0
           ? FloatingActionButton(
         onPressed: () => Navigator.of(context).push(

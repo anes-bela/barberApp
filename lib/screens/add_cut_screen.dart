@@ -42,8 +42,8 @@ class _AddCutScreenState extends State<AddCutScreen> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Ajouter une coupe'),
-        backgroundColor: Colors.green,
-        foregroundColor: Colors.white,
+        //backgroundColor: Colors.green,
+        //foregroundColor: Colors.white,
       ),
       body: GestureDetector(
         // ⬅️ PERMET DE CACHER LE CLAVIER EN TAPPANT AILLEURS
@@ -63,8 +63,10 @@ class _AddCutScreenState extends State<AddCutScreen> {
                     decoration: InputDecoration(
                       labelText: 'Prix de la coupe (DA)',
                       border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(12),
+                        borderRadius: BorderRadius.circular(8),
                       ),
+                      filled: true,
+                      //fillColor: Colors.grey[50],
                     ),
                     validator: (v) {
                       if (v == null || v.isEmpty) return 'Entrer un prix';
@@ -79,10 +81,12 @@ class _AddCutScreenState extends State<AddCutScreen> {
                     keyboardType: TextInputType.number,
                     decoration: InputDecoration(
                       labelText:
-                          'Mon % (par défaut ${appState.defaultPercent}%)',
+                      'Mon % (par défaut ${appState.defaultPercent}%)',
                       border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(12),
+                        borderRadius: BorderRadius.circular(8),
                       ),
+                      filled: true,
+                      //fillColor: Colors.grey[50],
                     ),
                     validator: (v) {
                       if (v == null || v.isEmpty)
@@ -100,8 +104,10 @@ class _AddCutScreenState extends State<AddCutScreen> {
                     decoration: InputDecoration(
                       labelText: 'Service (optionnel, ex: Dégradé + barbe)',
                       border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(12),
+                        borderRadius: BorderRadius.circular(8),
                       ),
+                      filled: true,
+                      //fillColor: Colors.grey[50],
                     ),
                   ),
                   const SizedBox(height: 18),
@@ -111,14 +117,8 @@ class _AddCutScreenState extends State<AddCutScreen> {
                     elevation: 2,
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(16),
-                      side: BorderSide(
-                        color: Theme.of(context).brightness == Brightness.dark
-                            ? Colors.white24      // bordure claire en mode sombre
-                            : Colors.black26,      // bordure foncée en mode clair
-                        width: 1.5,
-                      ),
                     ),
-                    color: Theme.of(context).cardColor,
+                    //color: Colors.green[50],
                     child: Padding(
                       padding: const EdgeInsets.all(16.0),
                       child: Column(
@@ -127,7 +127,7 @@ class _AddCutScreenState extends State<AddCutScreen> {
                             'RÉPARTITION',
                             style: TextStyle(
                               fontWeight: FontWeight.bold,
-                              color: Colors.grey[700],
+                              //color: Colors.grey[700],
                               fontSize: 16,
                             ),
                           ),
@@ -164,8 +164,8 @@ class _AddCutScreenState extends State<AddCutScreen> {
                       Navigator.of(context).pop();
                     },
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.green,
-                      foregroundColor: Colors.white,
+                      //backgroundColor: Colors.green,
+                      //foregroundColor: Colors.white,
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(12),
                       ),
@@ -184,7 +184,7 @@ class _AddCutScreenState extends State<AddCutScreen> {
                   OutlinedButton(
                     onPressed: () => Navigator.of(context).pop(),
                     style: OutlinedButton.styleFrom(
-                      side: BorderSide(color: Colors.green),
+                      //side: BorderSide(/*color: Colors.green*/),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(12),
                       ),
