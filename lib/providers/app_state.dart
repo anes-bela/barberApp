@@ -6,39 +6,60 @@ import '../models/day_record.dart';
 import '../models/predefined_service.dart';
 
 class AppState extends ChangeNotifier {
+  // 🔹 Clés de stockage
   static const String _kHistoryKey = 'history_v1';
   static const String _kSettingsKey = 'settings_v1';
   static const String _kServicesKey = 'predefined_services_v1';
+  static const String _kUserKey = 'user_v1';
 
+  // 🔹 Données principales
   int defaultPercent = 50;
   int historyLimit = 3;
+
 
   late DayRecord currentDay;
   List<DayRecord> history = [];
   
   // NOUVEAU: Liste des services prédéfinis
   List<PredefinedService> predefinedServices = [];
+    // 🔹 Thème (mode sombre)
+  bool _isDarkMode = false;
+  bool get isDarkMode => _isDarkMode;
+
+  // 🔹 Utilisateur
+  String? userName;
+  String? userEmail;
+  String? userAddress;
+  bool _isGuestMode = false;
+  bool get isGuestMode => _isGuestMode;
+
+
 
   AppState() {
     currentDay = DayRecord(date: _todayDate());
     load();
   }
 
+
+  /// Date du jour sans heure
+
   static DateTime _todayDate() {
     final now = DateTime.now();
     return DateTime(now.year, now.month, now.day);
   }
 
+
   Future<void> load() async {
     final prefs = await SharedPreferences.getInstance();
 
-    // settings
+    // paramètres
     final settingsStr = prefs.getString(_kSettingsKey);
     if (settingsStr != null) {
       try {
         final s = jsonDecode(settingsStr);
         defaultPercent = (s['defaultPercent'] ?? defaultPercent) as int;
         historyLimit = (s['historyLimit'] ?? historyLimit) as int;
+        _isDarkMode = (s['isDarkMode'] ?? false) as bool;
       } catch (_) {}
     }
 
@@ -55,6 +76,7 @@ class AppState extends ChangeNotifier {
       }
     }
 
+
     // NOUVEAU: Charger les services prédéfinis
     final servicesStr = prefs.getString(_kServicesKey);
     if (servicesStr != null) {
@@ -65,8 +87,20 @@ class AppState extends ChangeNotifier {
         predefinedServices = [];
       }
     }
+        // utilisateur
+    final userStr = prefs.getString(_kUserKey);
+    if (userStr != null) {
+      try {
+        final u = jsonDecode(userStr);
+        userName = u['name'];
+        userEmail = u['email'];
+        userAddress = u['address'];
+        _isGuestMode = u['isGuest'] ?? false;
+      } catch (_) {}
+    }
 
     // restaurer currentDay si présent
+
     final todayKey = _todayDate();
     if (history.isNotEmpty && history.first.date == todayKey) {
       currentDay = history.removeAt(0);
@@ -77,27 +111,40 @@ class AppState extends ChangeNotifier {
     notifyListeners();
   }
 
+  /// 🔹 Sauvegarder toutes les données
   Future<void> _saveAll() async {
     final prefs = await SharedPreferences.getInstance();
 
-    // settings
+    // paramètres
     final settingsMap = {
       'defaultPercent': defaultPercent,
-      'historyLimit': historyLimit
+      'historyLimit': historyLimit,
+      'isDarkMode': _isDarkMode,
     };
     await prefs.setString(_kSettingsKey, jsonEncode(settingsMap));
 
-    // history (inclut currentDay au début)
+    // historique
     final histToSave = [
       currentDay.toJson(),
       ...history.map((d) => d.toJson()),
     ];
     await prefs.setString(_kHistoryKey, jsonEncode(histToSave));
+
     
     // NOUVEAU: Sauvegarder les services prédéfinis
     final servicesJson = predefinedServices.map((s) => s.toJson()).toList();
     await prefs.setString(_kServicesKey, jsonEncode(servicesJson));
+     // utilisateur
+    final userMap = {
+      'name': userName,
+      'email': userEmail,
+      'address': userAddress,
+      'isGuest': _isGuestMode,
+    };
+    await prefs.setString(_kUserKey, jsonEncode(userMap));
   }
+
+  /// 🔹 Ajouter une coupe
 
   void addCut({required int price, required int percent, String service = ''}) {
     final cut = Cut(price: price, percent: percent, service: service);
@@ -106,6 +153,7 @@ class AppState extends ChangeNotifier {
     _saveAll();
   }
 
+  /// 🔹 Supprimer une coupe
   void removeCut(int index) {
     if (index >= 0 && index < currentDay.cuts.length) {
       currentDay.cuts.removeAt(index);
@@ -114,6 +162,7 @@ class AppState extends ChangeNotifier {
     }
   }
 
+  /// 🔹 Fermer la journée
   void closeDay() {
     if (currentDay.cuts.isEmpty) return;
 
@@ -128,6 +177,7 @@ class AppState extends ChangeNotifier {
     _saveAll();
   }
 
+  /// 🔹 Mettre à jour les paramètres
   void updateSettings({int? defaultPercent, int? historyLimit}) {
     if (defaultPercent != null) this.defaultPercent = defaultPercent;
     if (historyLimit != null) this.historyLimit = historyLimit;
@@ -139,7 +189,7 @@ class AppState extends ChangeNotifier {
     notifyListeners();
     _saveAll();
   }
-  
+
   // NOUVELLES MÉTHODES POUR LES SERVICES PRÉDÉFINIS
   void addPredefinedService(String name, int price) {
     predefinedServices.add(PredefinedService(name: name, price: price));
@@ -165,5 +215,40 @@ class AppState extends ChangeNotifier {
       notifyListeners();
       _saveAll();
     }
+  }
+  /// 🔹 Basculer le mode sombre
+  void toggleDarkMode(bool value) {
+    _isDarkMode = value;
+    notifyListeners();
+    _saveAll();
+  }
+
+  /// 🔹 Connexion utilisateur
+  void login({required String name, required String email, String? address}) {
+    userName = name;
+    userEmail = email;
+    userAddress = address;
+    _isGuestMode = false;
+    notifyListeners();
+    _saveAll();
+  }
+
+  /// 🔹 Mode invité
+  void enableGuestMode() {
+    userName = "Invité";
+    userEmail = null;
+    _isGuestMode = true;
+    notifyListeners();
+    _saveAll();
+  }
+
+  /// 🔹 Déconnexion
+  void logout() {
+    userName = null;
+    userEmail = null;
+    userAddress = null;
+    _isGuestMode = false;
+    notifyListeners();
+    _saveAll();
   }
 }

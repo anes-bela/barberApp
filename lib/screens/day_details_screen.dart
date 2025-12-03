@@ -56,7 +56,7 @@ class DayDetailsScreen extends StatelessWidget {
                             subtitle: Text(
                               'Moi: $my DA • Patron: $boss DA',
                               style: TextStyle(
-                                  fontSize: 13, color: Colors.grey[600]),
+                                  fontSize: 13, /*color: Colors.grey[600]*/),
                             ),
                             trailing: Container(
                               padding: EdgeInsets.symmetric(
@@ -83,7 +83,7 @@ class DayDetailsScreen extends StatelessWidget {
             // RÉSUMÉ AMÉLIORÉ
             Card(
               elevation: 2,
-              color: Colors.green[50],
+              //color: Colors.green[50],
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(12),
               ),
@@ -95,7 +95,7 @@ class DayDetailsScreen extends StatelessWidget {
                       'RÉSUMÉ DE LA JOURNÉE',
                       style: TextStyle(
                         fontWeight: FontWeight.bold,
-                        color: Colors.grey[700],
+                        //color: Colors.grey[700],
                       ),
                     ),
                     const SizedBox(height: 12),
@@ -103,28 +103,28 @@ class DayDetailsScreen extends StatelessWidget {
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
                         Text('Total:',
-                            style: TextStyle(fontWeight: FontWeight.w500)),
+                            style: TextStyle(fontWeight: FontWeight.w500 , /*color: Colors.grey[600]*/)),
                         Text('${day.total} DA',
-                            style: TextStyle(fontWeight: FontWeight.bold)),
+                            style: TextStyle(fontWeight: FontWeight.bold,/*color: Colors.grey[600]*/)),
                       ],
                     ),
                     const SizedBox(height: 8),
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        Text('Ma part:', style: TextStyle(color: Colors.green)),
-                        Text('${day.myShare} DA',
-                            style: TextStyle(color: Colors.green)),
+                        Text('Ma part:', /*style: TextStyle(color: Colors.green)*/),
+                        Text('${day.myShare} DA',)
+                            //style: TextStyle(color: Colors.green)),
                       ],
                     ),
                     const SizedBox(height: 4),
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        Text('Patron:',
-                            style: TextStyle(color: Colors.grey[600])),
-                        Text('${day.bossShare} DA',
-                            style: TextStyle(color: Colors.grey[600])),
+                        Text('Patron:',),
+                            //style: TextStyle(color: Colors.grey[600])),
+                        Text('${day.bossShare} DA',)
+                            //style: TextStyle(color: Colors.grey[600])),
                       ],
                     ),
                   ],

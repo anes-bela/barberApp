@@ -29,8 +29,7 @@ class HomeScreen extends StatelessWidget {
           Card(
             elevation: 2,
             shape:
-                RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-            color: Colors.green[50],
+            RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
             child: Padding(
               padding: const EdgeInsets.all(20.0),
               child: Column(
@@ -59,8 +58,8 @@ class HomeScreen extends StatelessWidget {
               child: Text('Ajouter une coupe', style: TextStyle(fontSize: 16)),
             ),
             style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.green,
-                foregroundColor: Colors.white,
+                //backgroundColor: Colors.green,
+                //foregroundColor: Colors.white,
                 shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(12)),
                 elevation: 2,
@@ -74,14 +73,14 @@ class HomeScreen extends StatelessWidget {
                   const SnackBar(content: Text('Journée clôturée')));
             },
             style: OutlinedButton.styleFrom(
-                side: BorderSide(color: Colors.green),
+                //side: BorderSide(color: Colors.green),
                 shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(12)),
                 minimumSize: const Size.fromHeight(48)),
             child: const Padding(
               padding: EdgeInsets.symmetric(vertical: 12.0),
               child:
-                  Text('Clôturer la journée', style: TextStyle(fontSize: 16)),
+              Text('Clôturer la journée', style: TextStyle(fontSize: 16)),
             ),
           ),
           const SizedBox(height: 18),
@@ -94,28 +93,28 @@ class HomeScreen extends StatelessWidget {
           Expanded(
             child: appState.currentDay.cuts.isEmpty
                 ? const Center(
-                    child: Text('Aucune coupe enregistrée aujourd\'hui'))
+                child: Text('Aucune coupe enregistrée aujourd\'hui'))
                 : ListView.separated(
-                    itemCount: appState.currentDay.cuts.length,
-                    separatorBuilder: (_, __) => const Divider(),
-                    itemBuilder: (ctx, i) {
-                      final c = appState.currentDay.cuts[
-                          appState.currentDay.cuts.length -
-                              1 -
-                              i]; // recent first
-                      final my = (c.price * c.percent) ~/ 100;
-                      final boss = c.price - my;
-                      return CutTile(
-                        cut: c,
-                        onDelete: () {
-                          // delete by index: compute original index
-                          final originalIndex =
-                              appState.currentDay.cuts.length - 1 - i;
-                          appState.removeCut(originalIndex);
-                        },
-                      );
-                    },
-                  ),
+              itemCount: appState.currentDay.cuts.length,
+              separatorBuilder: (_, __) => const Divider(),
+              itemBuilder: (ctx, i) {
+                final c = appState.currentDay.cuts[
+                appState.currentDay.cuts.length -
+                    1 -
+                    i]; // recent first
+                final my = (c.price * c.percent) ~/ 100;
+                final boss = c.price - my;
+                return CutTile(
+                  cut: c,
+                  onDelete: () {
+                    // delete by index: compute original index
+                    final originalIndex =
+                        appState.currentDay.cuts.length - 1 - i;
+                    appState.removeCut(originalIndex);
+                  },
+                );
+              },
+            ),
           ),
         ],
       ),

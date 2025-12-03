@@ -30,16 +30,35 @@ class _AddCutScreenState extends State<AddCutScreen> {
     super.dispose();
   }
 
-  Widget _buildPriceField() {
+  // Déco dynamique avec ColorScheme
+  InputDecoration _inputDecoration(String label, ColorScheme cs) {
+    return InputDecoration(
+      filled: true,
+      fillColor: cs.surface,
+      labelText: label,
+      labelStyle: TextStyle(color: cs.onSurface.withOpacity(0.7)),
+      enabledBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(8),
+        borderSide: BorderSide(
+          color: cs.primary.withOpacity(0.6),
+          width: 1.5,
+        ),
+      ),
+      focusedBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(8),
+        borderSide: BorderSide(
+          color: cs.primary,
+          width: 2,
+        ),
+      ),
+    );
+  }
+
+  Widget _buildPriceField(AppState appState, ColorScheme cs) {
     return TextFormField(
       controller: _priceCtrl,
       keyboardType: TextInputType.number,
-      decoration: InputDecoration(
-        labelText: 'Prix personnalisé (DA)',
-        border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
-        filled: true,
-        fillColor: Colors.grey[50],
-      ),
+      decoration: _inputDecoration('Prix personnalisé (DA)', cs),
       validator: (v) {
         if (v == null || v.isEmpty) return 'Entrer un prix';
         if (int.tryParse(v) == null) return 'Prix invalide';
@@ -52,7 +71,7 @@ class _AddCutScreenState extends State<AddCutScreen> {
   @override
   Widget build(BuildContext context) {
     final appState = Provider.of<AppState>(context);
-
+    final cs = Theme.of(context).colorScheme;
     int price = int.tryParse(_priceCtrl.text) ?? 0;
     int percent = int.tryParse(_percentCtrl.text) ?? appState.defaultPercent;
     int my = (price * percent) ~/ 100;
@@ -61,8 +80,6 @@ class _AddCutScreenState extends State<AddCutScreen> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Ajouter une coupe'),
-        backgroundColor: Colors.green,
-        foregroundColor: Colors.white,
       ),
       body: GestureDetector(
         onTap: () => FocusScope.of(context).unfocus(),
@@ -75,83 +92,82 @@ class _AddCutScreenState extends State<AddCutScreen> {
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
                   // SECTION SERVICES PRÉDÉFINIS
-                  Consumer<AppState>(
-                    builder: (context, appState, child) {
-                      if (appState.predefinedServices.isNotEmpty) {
-                        return Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              'Services rapides',
-                              style: TextStyle(
-                                fontWeight: FontWeight.w500,
-                                color: Colors.grey[700],
-                                fontSize: 16,
+                  if (appState.predefinedServices.isNotEmpty)
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'Services rapides',
+                          style: TextStyle(
+                            fontWeight: FontWeight.w500,
+                            color: Colors.grey[700],
+                            fontSize: 16,
+                          ),
+                        ),
+                        const SizedBox(height: 8),
+                        Wrap(
+                          spacing: 8,
+                          runSpacing: 8,
+                          children: appState.predefinedServices.map((service) {
+                            final isSelected =
+                                _priceCtrl.text == service.price.toString() &&
+                                    _serviceCtrl.text == service.name;
+
+                            final isDark =
+                                Theme.of(context).brightness == Brightness.dark;
+
+                            return FilterChip(
+                              label:
+                                  Text('${service.name} - ${service.price} DA'),
+
+                              selected: isSelected,
+                              onSelected: (selected) {
+                                setState(() {
+                                  _priceCtrl.text = service.price.toString();
+                                  _serviceCtrl.text = service.name;
+                                });
+                              },
+
+                              // Couleur du chip quand NON sélectionné
+                              backgroundColor:
+                                  isDark ? Colors.grey[800] : Colors.grey[200],
+
+                              // Couleur du chip quand sélectionné
+                              selectedColor: cs.primary,
+
+                              checkmarkColor: Colors.white,
+
+                              // 🔥 CORRECTION : texte adapté au dark mode
+                              labelStyle: TextStyle(
+                                color: isSelected
+                                    ? Colors.white
+                                    : (isDark ? Colors.white : Colors.black),
                               ),
-                            ),
-                            const SizedBox(height: 8),
-                            Wrap(
-                              spacing: 8,
-                              runSpacing: 8,
-                              children:
-                                  appState.predefinedServices.map((service) {
-                                return FilterChip(
-                                  label: Text(
-                                      '${service.name} - ${service.price} DA'),
-                                  selected: _priceCtrl.text ==
-                                          service.price.toString() &&
-                                      _serviceCtrl.text == service.name,
-                                  onSelected: (selected) {
-                                    setState(() {
-                                      _priceCtrl.text =
-                                          service.price.toString();
-                                      _serviceCtrl.text = service.name;
-                                    });
-                                  },
-                                  selectedColor: Colors.green,
-                                  checkmarkColor: Colors.white,
-                                  labelStyle: TextStyle(
-                                    color: _priceCtrl.text ==
-                                            service.price.toString()
-                                        ? Colors.white
-                                        : Colors.black,
-                                  ),
-                                );
-                              }).toList(),
-                            ),
-                            const SizedBox(height: 16),
-                            Text(
-                              'Ou prix personnalisé :',
-                              style: TextStyle(
-                                fontWeight: FontWeight.w500,
-                                color: Colors.grey[600],
-                              ),
-                            ),
-                            const SizedBox(height: 8),
-                          ],
-                        );
-                      }
-                      return const SizedBox();
-                    },
-                  ),
+                            );
+                          }).toList(),
+                        ),
+                        const SizedBox(height: 16),
+                        Text(
+                          'Ou prix personnalisé :',
+                          style: TextStyle(
+                            fontWeight: FontWeight.w500,
+                            color: Colors.grey[600],
+                          ),
+                        ),
+                        const SizedBox(height: 8),
+                      ],
+                    ),
 
                   // CHAMP PRIX
-                  _buildPriceField(),
+                  _buildPriceField(appState, cs),
                   const SizedBox(height: 12),
 
                   // CHAMP POURCENTAGE
                   TextFormField(
                     controller: _percentCtrl,
                     keyboardType: TextInputType.number,
-                    decoration: InputDecoration(
-                      labelText:
-                          'Mon % (par défaut ${appState.defaultPercent}%)',
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      filled: true,
-                      fillColor: Colors.grey[50],
-                    ),
+                    decoration: _inputDecoration(
+                        'Mon % (par défaut ${appState.defaultPercent}%)', cs),
                     validator: (v) {
                       if (v == null || v.isEmpty)
                         return 'Entrer un pourcentage';
@@ -167,14 +183,8 @@ class _AddCutScreenState extends State<AddCutScreen> {
                   // CHAMP SERVICE
                   TextFormField(
                     controller: _serviceCtrl,
-                    decoration: InputDecoration(
-                      labelText: 'Service (optionnel, ex: Dégradé + barbe)',
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      filled: true,
-                      fillColor: Colors.grey[50],
-                    ),
+                    decoration: _inputDecoration(
+                        'Service (optionnel, ex: Dégradé + barbe)', cs),
                   ),
                   const SizedBox(height: 18),
 
@@ -184,7 +194,6 @@ class _AddCutScreenState extends State<AddCutScreen> {
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(16),
                     ),
-                    color: Colors.green[50],
                     child: Padding(
                       padding: const EdgeInsets.all(16.0),
                       child: Column(
@@ -227,8 +236,8 @@ class _AddCutScreenState extends State<AddCutScreen> {
                       Navigator.of(context).pop();
                     },
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.green,
-                      foregroundColor: Colors.white,
+                      backgroundColor: cs.primary,
+                      foregroundColor: cs.onPrimary,
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(12),
                       ),
@@ -247,7 +256,7 @@ class _AddCutScreenState extends State<AddCutScreen> {
                   OutlinedButton(
                     onPressed: () => Navigator.of(context).pop(),
                     style: OutlinedButton.styleFrom(
-                      side: BorderSide(color: Colors.green),
+                      side: BorderSide(color: cs.primary),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(12),
                       ),
@@ -261,7 +270,6 @@ class _AddCutScreenState extends State<AddCutScreen> {
                       ),
                     ),
                   ),
-
                   const SizedBox(height: 20),
                 ],
               ),
