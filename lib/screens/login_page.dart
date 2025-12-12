@@ -2,8 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:gestion_jr/screens/ForgotPassword_page.dart';
 import '../main.dart';
 import 'signup_page.dart';
+import 'package:provider/provider.dart';
+import '../providers/app_state.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+
+
 
 class LoginPage extends StatefulWidget {
+  
   const LoginPage({super.key});
 
   @override
@@ -254,15 +260,35 @@ class _LoginPageState extends State<LoginPage> {
 
                       // LOGIN BUTTON
                       ElevatedButton(
-                        onPressed: () {
-                          if (_formKey.currentState!.validate()) {
-                            Navigator.pushReplacement(
-                              context,
-                              MaterialPageRoute(
-                                  builder: (_) => const MainScaffold()),
-                            );
-                          }
-                        },
+                       onPressed: () async {
+  if (_formKey.currentState!.validate()) {
+    try {
+      // Connexion Firebase
+      UserCredential userCredential =
+          await FirebaseAuth.instance.signInWithEmailAndPassword(
+        email: _emailController.text.trim(),
+        password: _passwordController.text.trim(),
+      );
+
+      // Enregistrer dans AppState
+      Provider.of<AppState>(context, listen: false).login(
+        name: userCredential.user!.email!.split('@')[0],
+        email: userCredential.user!.email!,
+      );
+
+      // Aller à l'écran principal
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (_) => const MainScaffold()),
+      );
+
+    } on FirebaseAuthException catch (e) {
+     
+    }
+  }
+},
+
+
                         style: ElevatedButton.styleFrom(
                           minimumSize: Size(
                             double.infinity,

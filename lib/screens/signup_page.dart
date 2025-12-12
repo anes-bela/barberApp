@@ -3,6 +3,14 @@ import 'package:provider/provider.dart';
 import '../providers/app_state.dart';
 import 'login_page.dart';
 import '../main.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'auth_gate.dart';
+import 'home_screen.dart';  // ← ajoute ceci
+
+
+
+
 
 class SignupPage extends StatefulWidget {
   const SignupPage({super.key});
@@ -20,6 +28,7 @@ class _SignupPageState extends State<SignupPage> {
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
   final TextEditingController _confirmPasswordController = TextEditingController();
+  
 
   @override
   Widget build(BuildContext context) {
@@ -187,29 +196,58 @@ class _SignupPageState extends State<SignupPage> {
 
                   const SizedBox(height: 30),
 
+
+
+const SizedBox(height: 16),
+
                   // BOUTON CRÉER UN COMPTE
                   ElevatedButton(
-                    onPressed: () {
-                      if (_formKey.currentState!.validate()) {
-                        Provider.of<AppState>(context, listen: false).login(
-                          name: _nameController.text.trim(),
-                          email: _emailController.text.trim(),
-                        );
+  onPressed: () async {
+  if (_formKey.currentState!.validate()) {
+    try {
+      // Créer l'utilisateur dans Firebase
+      await FirebaseAuth.instance.createUserWithEmailAndPassword(
+        email: _emailController.text.trim(),
+        password: _passwordController.text.trim(),
+      );
 
-                        Navigator.pushReplacement(
-                          context,
-                          MaterialPageRoute(builder: (_) => const MainScaffold()),
-                        );
-                      }
-                    },
-                    style: ElevatedButton.styleFrom(
-                      minimumSize: const Size(double.infinity, 50),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(30),
-                      ),
-                    ),
-                    child: const Text("Créer un compte", style: TextStyle(fontSize: 15)),
-                  ),
+      // Optionnel : afficher un message de succès
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("Compte créé avec succès !")),
+      );
+
+      // Toujours mettre à jour ton AppState
+      Provider.of<AppState>(context, listen: false).login(
+        name: _nameController.text.trim(),
+        email: _emailController.text.trim(),
+      );
+
+      // Naviguer vers la page principale
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (_) => const MainScaffold()),
+      );
+    } on FirebaseAuthException catch (e) {
+      // Afficher l'erreur si la création échoue
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(e.message ?? "Erreur inconnue")),
+      );
+    }
+  }
+},
+
+
+  style: ElevatedButton.styleFrom(
+    minimumSize: const Size(double.infinity, 50),
+    shape: RoundedRectangleBorder(
+      borderRadius: BorderRadius.circular(30),
+    ),
+  ),
+  child: const Text("Créer un compte", style: TextStyle(fontSize: 15)),
+),
+
+
+
 
                   const SizedBox(height: 16),
 

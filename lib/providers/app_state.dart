@@ -4,6 +4,9 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../models/cut.dart';
 import '../models/day_record.dart';
 import '../models/predefined_service.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+
 
 class AppState extends ChangeNotifier {
   // 🔹 Clés de stockage
@@ -113,36 +116,37 @@ class AppState extends ChangeNotifier {
 
   /// 🔹 Sauvegarder toutes les données
   Future<void> _saveAll() async {
-    final prefs = await SharedPreferences.getInstance();
+  final prefs = await SharedPreferences.getInstance();
 
-    // paramètres
-    final settingsMap = {
-      'defaultPercent': defaultPercent,
-      'historyLimit': historyLimit,
-      'isDarkMode': _isDarkMode,
-    };
-    await prefs.setString(_kSettingsKey, jsonEncode(settingsMap));
+  // SAUVEGARDE LOCALE
+  final settingsMap = {
+    'defaultPercent': defaultPercent,
+    'historyLimit': historyLimit,
+    'isDarkMode': _isDarkMode,
+  };
+  await prefs.setString(_kSettingsKey, jsonEncode(settingsMap));
 
-    // historique
-    final histToSave = [
-      currentDay.toJson(),
-      ...history.map((d) => d.toJson()),
-    ];
-    await prefs.setString(_kHistoryKey, jsonEncode(histToSave));
+  final histToSave = [
+    currentDay.toJson(),
+    ...history.map((d) => d.toJson()),
+  ];
+  await prefs.setString(_kHistoryKey, jsonEncode(histToSave));
 
-    
-    // NOUVEAU: Sauvegarder les services prédéfinis
-    final servicesJson = predefinedServices.map((s) => s.toJson()).toList();
-    await prefs.setString(_kServicesKey, jsonEncode(servicesJson));
-     // utilisateur
-    final userMap = {
-      'name': userName,
-      'email': userEmail,
-      'address': userAddress,
-      'isGuest': _isGuestMode,
-    };
-    await prefs.setString(_kUserKey, jsonEncode(userMap));
-  }
+  final servicesJson = predefinedServices.map((s) => s.toJson()).toList();
+  await prefs.setString(_kServicesKey, jsonEncode(servicesJson));
+
+  final userMap = {
+    'name': userName,
+    'email': userEmail,
+    'address': userAddress,
+    'isGuest': _isGuestMode,
+  };
+  await prefs.setString(_kUserKey, jsonEncode(userMap));
+
+  // ⭐ SAUVEGARDE DANS FIRESTORE
+  await saveAllToFirestore();
+}
+
 
   /// 🔹 Ajouter une coupe
 
@@ -222,7 +226,7 @@ class AppState extends ChangeNotifier {
     notifyListeners();
     _saveAll();
   }
-
+  
   /// 🔹 Connexion utilisateur
   void login({required String name, required String email, String? address}) {
     userName = name;
@@ -232,6 +236,7 @@ class AppState extends ChangeNotifier {
     notifyListeners();
     _saveAll();
   }
+  
 
   /// 🔹 Mode invité
   void enableGuestMode() {
@@ -241,6 +246,72 @@ class AppState extends ChangeNotifier {
     notifyListeners();
     _saveAll();
   }
+  Future<void> loadUserData() async {
+  final user = FirebaseAuth.instance.currentUser;
+
+  if (user == null) return; // si pas connecté
+
+  userEmail = user.email;
+
+  // Récupérer les données Firestore
+  final doc = await FirebaseFirestore.instance
+      .collection('users')
+      .doc(user.uid)
+      .get();
+
+  if (doc.exists) {
+    userName = doc['name'];
+    userAddress = doc['address'] ?? '';
+  }
+
+  notifyListeners();
+  _saveAll(); // pour garder en local
+}
+  /// 🔹 Connexion utilisateur
+Future<void> loginFromFirebase() async {
+  await loadUserData(); 
+  await loadAllFromFirestore(); // ⭐ CHARGER FIRESTORE
+  _isGuestMode = false;
+  notifyListeners();
+  _saveAll();
+}
+
+    Future<String?> createAccount({
+  required String name,
+  required String email,
+  required String password,
+  required String address,
+}) async {
+  try {
+    // 1. Créer le compte
+    UserCredential cred = await FirebaseAuth.instance
+        .createUserWithEmailAndPassword(email: email, password: password);
+
+    final uid = cred.user!.uid;
+
+    // 2. Sauvegarder dans Firestore
+    await FirebaseFirestore.instance.collection("users").doc(uid).set({
+      "name": name,
+      "email": email,
+      "address": address,
+    });
+
+    // 3. Mettre à jour AppState
+    userName = name;
+    userEmail = email;
+    userAddress = address;
+    _isGuestMode = false;
+
+    notifyListeners();
+    _saveAll();
+        // 🔥 IMPORTANT : charger les infos depuis FirebaseAuth + Firestore
+    await loginFromFirebase();
+
+    return null;
+  } catch (e) {
+    return e.toString();
+  }
+}
 
   /// 🔹 Déconnexion
   void logout() {
@@ -251,4 +322,78 @@ class AppState extends ChangeNotifier {
     notifyListeners();
     _saveAll();
   }
+  Future<void> saveAllToFirestore() async {
+  final user = FirebaseAuth.instance.currentUser;
+  if (user == null) return;
+
+  await FirebaseFirestore.instance.collection("users").doc(user.uid).set({
+    "name": userName,
+    "email": userEmail,
+    "address": userAddress,
+    "isGuest": _isGuestMode,
+
+    "settings": {
+      "defaultPercent": defaultPercent,
+      "historyLimit": historyLimit,
+      "isDarkMode": _isDarkMode,
+    },
+
+    "currentDay": currentDay.toJson(),
+
+    "history": history.map((d) => d.toJson()).toList(),
+
+    "predefinedServices":
+        predefinedServices.map((s) => s.toJson()).toList(),
+  }, SetOptions(merge: true));
+}
+Future<void> loadAllFromFirestore() async {
+  final user = FirebaseAuth.instance.currentUser;
+  if (user == null) return;
+
+  final doc = await FirebaseFirestore.instance
+      .collection("users")
+      .doc(user.uid)
+      .get();
+
+  if (!doc.exists) return;
+
+  final data = doc.data()!;
+
+  userName = data["name"];
+  userEmail = data["email"];
+  userAddress = data["address"];
+  _isGuestMode = data["isGuest"] ?? false;
+
+  // settings
+  if (data["settings"] != null) {
+    defaultPercent = data["settings"]["defaultPercent"] ?? defaultPercent;
+    historyLimit = data["settings"]["historyLimit"] ?? historyLimit;
+    _isDarkMode = data["settings"]["isDarkMode"] ?? false;
+  }
+
+  // currentDay
+  if (data["currentDay"] != null) {
+    currentDay = DayRecord.fromJson(
+        Map<String, dynamic>.from(data["currentDay"]));
+  }
+
+  // history
+  if (data["history"] != null) {
+    history = (data["history"] as List)
+        .map((e) => DayRecord.fromJson(Map<String, dynamic>.from(e)))
+        .toList();
+  }
+
+  // predefined services
+  if (data["predefinedServices"] != null) {
+    predefinedServices = (data["predefinedServices"] as List)
+        .map((e) => PredefinedService.fromJson(
+            Map<String, dynamic>.from(e)))
+        .toList();
+  }
+
+  notifyListeners();
+  await _saveAll();  // sauver en local
+}
+
 }
