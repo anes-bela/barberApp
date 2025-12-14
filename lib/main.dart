@@ -7,11 +7,18 @@ import 'screens/home_screen.dart';
 import 'screens/history_screen.dart';
 import 'screens/settings_screen.dart';
 import 'screens/add_cut_screen.dart';
+import 'package:flutter/material.dart';
+import 'package:firebase_core/firebase_core.dart';
+import 'firebase_options.dart';
+import 'screens/auth_gate.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   final appState = AppState();
   await appState.load();
+  await Firebase.initializeApp(
+    options: DefaultFirebaseOptions.currentPlatform,
+  );
   runApp(ChangeNotifierProvider.value(value: appState, child: const MyApp()));
 }
 
@@ -128,7 +135,7 @@ class MyApp extends StatelessWidget {
           ),
 
           // 🏁 Première page : SplashScreen
-          home: const SplashScreen(),
+          home: const AuthGate(),
         );
       },
     );

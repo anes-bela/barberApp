@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'dart:math'; 
+import 'package:cloud_firestore/cloud_firestore.dart'; 
 
 // ------------------------------------------------------------
 //  PAGE 1 : MOT DE PASSE OUBLIÉ (VALIDATION EMAIL)
@@ -15,99 +18,109 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
   final TextEditingController emailController = TextEditingController();
   final _emailKey = GlobalKey<FormState>();
 
+  Future<void> sendOtp(String email) async {
+    // Générer un OTP à 4 chiffres
+    String otp = (1000 + Random().nextInt(9000)).toString();
+
+    // Stocker l'OTP dans Firestore
+    await FirebaseFirestore.instance.collection('password_otps').doc(email).set({
+      'otp': otp,
+      'createdAt': Timestamp.now(),
+    });
+
+    // Afficher l’OTP dans la console (pour test)
+    print('OTP pour $email : $otp');
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text('OTP généré et enregistré pour test !')),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
     return Scaffold(
-    backgroundColor: cs.background,
-    appBar: AppBar(
-    leading: BackButton(color: cs.onBackground),
-    backgroundColor: Colors.transparent,
-    elevation: 0,
-    ),
-    body: Padding(
-    padding: const EdgeInsets.all(24.0),
-    child: SingleChildScrollView(
-    child: Form(
-    key: _emailKey,
-    child: Column(
-    crossAxisAlignment: CrossAxisAlignment.start,
-    children: [
-    Text(
-    "Mot de passe oublié",
-    style: TextStyle(
-    fontSize: 26,
-    fontWeight: FontWeight.bold,
-    color: cs.onBackground,
-    ),
-    ),
-    const SizedBox(height: 8),
-    Text(
-    "Entrez votre adresse e-mail pour recevoir un code de vérification.",
-    textAlign: TextAlign.center,
-    style: TextStyle(
-    fontSize: 13,
-    color: cs.onBackground.withOpacity(0.7),
-    ),
-    ),
-    const SizedBox(height: 30),
-    TextFormField(
-    controller: emailController,
-    style: TextStyle(color: cs.onSurface),
-    decoration: InputDecoration(
-    filled: true,
-    fillColor: cs.surface,
-    prefixIcon: Icon(Icons.email_outlined, color: cs.primary),
-    labelText: "Adresse e-mail",
-    labelStyle: TextStyle(color: cs.onSurface.withOpacity(0.7)),
-    border: OutlineInputBorder(
-    borderRadius: BorderRadius.circular(30),
-    ),
-    ),
-    validator: (value) {
-    if (value == null || value.isEmpty) {
-    return "Veuillez entrer votre adresse e-mail";
-    }
-    if (!RegExp(r'^[\w-.]+@([\w-]+\.)+[\w-]{2,4}$').hasMatch(value)) {
-    return "Entrez une adresse e-mail valide";
-    }
-    return null;
-    },
-    ),
-    const SizedBox(height: 25),
-    ElevatedButton(
-    onPressed: () {
-    if (_emailKey.currentState!.validate()) {
-    Navigator.push(
-    context,
-    MaterialPageRoute(builder: (_) => const OTPVerificationPage()),
+      backgroundColor: cs.background,
+      appBar: AppBar(
+        leading: BackButton(color: cs.onBackground),
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+      ),
+      body: Padding(
+        padding: const EdgeInsets.all(24.0),
+        child: SingleChildScrollView(
+          child: Form(
+            key: _emailKey,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  "Mot de passe oublié",
+                  style: TextStyle(
+                    fontSize: 26,
+                    fontWeight: FontWeight.bold,
+                    color: cs.onBackground,
+                  ),
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  "Entrez votre adresse e-mail pour recevoir un code de vérification.",
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    fontSize: 13,
+                    color: cs.onBackground.withOpacity(0.7),
+                  ),
+                ),
+                const SizedBox(height: 30),
+                TextFormField(
+                  controller: emailController,
+                  style: TextStyle(color: cs.onSurface),
+                  decoration: InputDecoration(
+                    filled: true,
+                    fillColor: cs.surface,
+                    prefixIcon: Icon(Icons.email_outlined, color: cs.primary),
+                    labelText: "Adresse e-mail",
+                    labelStyle: TextStyle(color: cs.onSurface.withOpacity(0.7)),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(30),
+                    ),
+                  ),
+                  validator: (value) {
+                    if (value == null || value.isEmpty) return "Veuillez entrer votre adresse e-mail";
+                    if (!RegExp(r'^[\w-.]+@([\w-]+\.)+[\w-]{2,4}$').hasMatch(value)) return "Entrez une adresse e-mail valide";
+                    return null;
+                  },
+                ),
+                const SizedBox(height: 25),
+                ElevatedButton(
+                  onPressed: () async {
+                    if (_emailKey.currentState!.validate()) {
+                      String email = emailController.text.trim();
+                      await sendOtp(email);  // Générer OTP et stocker Firestore
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (_) => OTPVerificationPage(email: email)),
+                      );
+                    }
+                  },
+                  child: const Text("Envoyer le code"),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
     );
-    }
-    },
-    style: ElevatedButton.styleFrom(
-    minimumSize: const Size(double.infinity, 50),
-    shape: RoundedRectangleBorder(
-    borderRadius: BorderRadius.circular(30),
-    ),
-    ),
-    child: const Text("Continuer", style: TextStyle(fontSize: 15)),
-    ),
-    ],
-    ),
-    ),
-    ),
-    ),
-    );
-
   }
 }
 
 // ------------------------------------------------------------
-//  PAGE 2 : VERIFICATION OTP (4 CHIFFRES OBLIGATOIRES)
+//  PAGE 2 : VERIFICATION OTP
 // ------------------------------------------------------------
 
 class OTPVerificationPage extends StatefulWidget {
-  const OTPVerificationPage({super.key});
+  final String email;
+  const OTPVerificationPage({super.key, required this.email});
 
   @override
   State<OTPVerificationPage> createState() => _OTPVerificationPageState();
@@ -122,103 +135,114 @@ class _OTPVerificationPageState extends State<OTPVerificationPage> {
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
     return Scaffold(
-    backgroundColor: cs.background,
-    appBar: AppBar(
-    leading: BackButton(color: cs.onBackground),
-    backgroundColor: Colors.transparent,
-    elevation: 0,
-    ),
-    body: Padding(
-    padding: const EdgeInsets.all(24.0),
-    child: Column(
-    crossAxisAlignment: CrossAxisAlignment.center,
-    children: [
-    Text(
-    "Vérifiez votre code",
-    style: TextStyle(
-    fontSize: 26,
-    fontWeight: FontWeight.bold,
-    color: cs.onBackground,
-    ),
-    ),
-    const SizedBox(height: 8),
-    Text(
-    "Entrez le code envoyé à votre e-mail.",
-    textAlign: TextAlign.center,
-    style: TextStyle(
-    fontSize: 13,
-    color: cs.onBackground.withOpacity(0.7),
-    ),
-    ),
-    const SizedBox(height: 30),
-    Row(
-    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-    children: List.generate(4, (index) {
-    return SizedBox(
-    width: 60,
-    height: 60,
-    child: TextFormField(
-    controller: otp[index],
-    textAlign: TextAlign.center,
-    maxLength: 1,
-    keyboardType: TextInputType.number,
-    style: TextStyle(color: cs.onSurface, fontSize: 22),
-    decoration: InputDecoration(
-    filled: true,
-    fillColor: cs.surface,
-    border: OutlineInputBorder(
-    borderRadius: BorderRadius.circular(12),
-    ),
-    counterText: "",
-    ),
-    ),
+      backgroundColor: cs.background,
+      appBar: AppBar(
+        leading: BackButton(color: cs.onBackground),
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+      ),
+      body: Padding(
+        padding: const EdgeInsets.all(24.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            Text(
+              "Vérifiez votre code",
+              style: TextStyle(
+                fontSize: 26,
+                fontWeight: FontWeight.bold,
+                color: cs.onBackground,
+              ),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              "Entrez le code envoyé à votre e-mail.",
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                fontSize: 13,
+                color: cs.onBackground.withOpacity(0.7),
+              ),
+            ),
+            const SizedBox(height: 30),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: List.generate(4, (index) {
+                return SizedBox(
+                  width: 60,
+                  height: 60,
+                  child: TextFormField(
+                    controller: otp[index],
+                    textAlign: TextAlign.center,
+                    maxLength: 1,
+                    keyboardType: TextInputType.number,
+                    style: TextStyle(color: cs.onSurface, fontSize: 22),
+                    decoration: InputDecoration(
+                      filled: true,
+                      fillColor: cs.surface,
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      counterText: "",
+                    ),
+                  ),
+                );
+              }),
+            ),
+            const SizedBox(height: 25),
+            ElevatedButton(
+              onPressed: () async {
+                if (!isOtpComplete()) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text("Veuillez entrer le code complet.")),
+                  );
+                  return;
+                }
+
+                String enteredOtp = otp.map((c) => c.text).join();
+                final doc = await FirebaseFirestore.instance.collection("password_otps").doc(widget.email).get();
+
+                if (!doc.exists || doc['otp'] != enteredOtp) {
+                  ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("OTP incorrect")));
+                  return;
+                }
+
+                // OTP correct → aller à la page Nouveau mot de passe
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) => NewPasswordPage(email: widget.email),
+                  ),
+                );
+              },
+              style: ElevatedButton.styleFrom(
+                minimumSize: const Size(double.infinity, 50),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(30),
+                ),
+              ),
+              child: const Text("Continuer", style: TextStyle(fontSize: 15)),
+            ),
+            TextButton(
+              onPressed: () {},
+              child: Text(
+                "Renvoyer le code",
+                style: TextStyle(color: cs.primary, fontSize: 14),
+              ),
+            ),
+          ],
+        ),
+      ),
     );
-    }),
-    ),
-    const SizedBox(height: 25),
-    ElevatedButton(
-    onPressed: () {
-    if (!isOtpComplete()) {
-    ScaffoldMessenger.of(context).showSnackBar(
-    const SnackBar(
-    content: Text("Veuillez entrer le code complet (4 chiffres)."),
-    ),
-    );
-    return;
-    }
-    Navigator.push(
-    context,
-    MaterialPageRoute(builder: (_) => const NewPasswordPage()),
-    );
-    },
-    style: ElevatedButton.styleFrom(
-    minimumSize: const Size(double.infinity, 50),
-    shape: RoundedRectangleBorder(
-    borderRadius: BorderRadius.circular(30),
-    ),
-    ),
-    child: const Text("Continuer", style: TextStyle(fontSize: 15)),
-    ),
-    TextButton(
-    onPressed: () {},
-    child: Text(
-    "Renvoyer le code",
-    style: TextStyle(color: cs.primary, fontSize: 14),
-    ),
-    ),
-    ],
-    ),
-    ),
-    );
-    }
+  }
 }
 
 // ------------------------------------------------------------
-//  PAGE 3 : NOUVEAU MOT DE PASSE (VALIDATION)
+//  PAGE 3 : NOUVEAU MOT DE PASSE
 // ------------------------------------------------------------
 
 class NewPasswordPage extends StatefulWidget {
-  const NewPasswordPage({super.key});
+  final String email;
+  const NewPasswordPage({super.key, required this.email});
 
   @override
   State<NewPasswordPage> createState() => _NewPasswordPageState();
@@ -235,96 +259,114 @@ class _NewPasswordPageState extends State<NewPasswordPage> {
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
     return Scaffold(
-    backgroundColor: cs.background,
-    appBar: AppBar(
-    leading: BackButton(color: cs.onBackground),
-    backgroundColor: Colors.transparent,
-    elevation: 0,
-    ),
-    body: Padding(
-    padding: const EdgeInsets.all(24.0),
-    child: Form(
-    key: _passwordKey,
-    child: Column(
-    crossAxisAlignment: CrossAxisAlignment.center,
-    children: [
-    Text(
-    "Créer un nouveau mot de passe",
-    style: TextStyle(
-    fontSize: 26,
-    fontWeight: FontWeight.bold,
-    color: cs.onBackground,
-    ),
-    ),
-    const SizedBox(height: 20),
-    TextFormField(
-    controller: pass,
-    obscureText: !showPassword,
-    style: TextStyle(color: cs.onSurface),
-    decoration: InputDecoration(
-    filled: true,
-    fillColor: cs.surface,
-    prefixIcon: Icon(Icons.lock_outline, color: cs.primary),
-    labelText: "Mot de passe",
-    labelStyle: TextStyle(color: cs.onSurface.withOpacity(0.7)),
-    border: OutlineInputBorder(
-    borderRadius: BorderRadius.circular(30),
-    ),
-    suffixIcon: IconButton(
-    icon: Icon(showPassword ? Icons.visibility_off : Icons.visibility, color: cs.onSurface.withOpacity(0.6)),
-    onPressed: () => setState(() => showPassword = !showPassword),
-    ),
-    ),
-    validator: (value) {
-    if (value == null || value.isEmpty) return "Veuillez entrer un mot de passe";
-    if (value.length < 6) return "Le mot de passe doit contenir au moins 6 caractères";
-    return null;
-    },
-    ),
-    const SizedBox(height: 20),
-    TextFormField(
-    controller: confirm,
-    obscureText: !showConfirmPassword,
-    style: TextStyle(color: cs.onSurface),
-    decoration: InputDecoration(
-    filled: true,
-    fillColor: cs.surface,
-    prefixIcon: Icon(Icons.lock_outline, color: cs.primary),
-    labelText: "Confirmer le mot de passe",
-    labelStyle: TextStyle(color: cs.onSurface.withOpacity(0.7)),
-    border: OutlineInputBorder(
-    borderRadius: BorderRadius.circular(30),
-    ),
-    suffixIcon: IconButton(
-    icon: Icon(showConfirmPassword ? Icons.visibility_off : Icons.visibility, color: cs.onSurface.withOpacity(0.6)),
-    onPressed: () => setState(() => showConfirmPassword = !showConfirmPassword),
-    ),
-    ),
-    validator: (value) {
-    if (value == null || value.isEmpty) return "Veuillez confirmer votre mot de passe";
-    if (value != pass.text) return "Les mots de passe ne correspondent pas";
-    return null;
-    },
-    ),
-    const SizedBox(height: 30),
-    ElevatedButton(
-    onPressed: () {
-    if (_passwordKey.currentState!.validate()) {
-    Navigator.popUntil(context, (route) => route.isFirst);
-    }
-    },
-    style: ElevatedButton.styleFrom(
-    minimumSize: const Size(double.infinity, 50),
-    shape: RoundedRectangleBorder(
-    borderRadius: BorderRadius.circular(30),
-    ),
-    ),
-    child: const Text("Continuer", style: TextStyle(fontSize: 15)),
-    ),
-    ],
-    ),
-    ),
-    ),
+      backgroundColor: cs.background,
+      appBar: AppBar(
+        leading: BackButton(color: cs.onBackground),
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+      ),
+      body: Padding(
+        padding: const EdgeInsets.all(24.0),
+        child: Form(
+          key: _passwordKey,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              Text(
+                "Créer un nouveau mot de passe",
+                style: TextStyle(
+                  fontSize: 26,
+                  fontWeight: FontWeight.bold,
+                  color: cs.onBackground,
+                ),
+              ),
+              const SizedBox(height: 20),
+              TextFormField(
+                controller: pass,
+                obscureText: !showPassword,
+                style: TextStyle(color: cs.onSurface),
+                decoration: InputDecoration(
+                  filled: true,
+                  fillColor: cs.surface,
+                  prefixIcon: Icon(Icons.lock_outline, color: cs.primary),
+                  labelText: "Mot de passe",
+                  labelStyle: TextStyle(color: cs.onSurface.withOpacity(0.7)),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(30),
+                  ),
+                  suffixIcon: IconButton(
+                    icon: Icon(showPassword ? Icons.visibility_off : Icons.visibility, color: cs.onSurface.withOpacity(0.6)),
+                    onPressed: () => setState(() => showPassword = !showPassword),
+                  ),
+                ),
+                validator: (value) {
+                  if (value == null || value.isEmpty) return "Veuillez entrer un mot de passe";
+                  if (value.length < 6) return "Le mot de passe doit contenir au moins 6 caractères";
+                  return null;
+                },
+              ),
+              const SizedBox(height: 20),
+              TextFormField(
+                controller: confirm,
+                obscureText: !showConfirmPassword,
+                style: TextStyle(color: cs.onSurface),
+                decoration: InputDecoration(
+                  filled: true,
+                  fillColor: cs.surface,
+                  prefixIcon: Icon(Icons.lock_outline, color: cs.primary),
+                  labelText: "Confirmer le mot de passe",
+                  labelStyle: TextStyle(color: cs.onSurface.withOpacity(0.7)),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(30),
+                  ),
+                  suffixIcon: IconButton(
+                    icon: Icon(showConfirmPassword ? Icons.visibility_off : Icons.visibility, color: cs.onSurface.withOpacity(0.6)),
+                    onPressed: () => setState(() => showConfirmPassword = !showConfirmPassword),
+                  ),
+                ),
+                validator: (value) {
+                  if (value == null || value.isEmpty) return "Veuillez confirmer votre mot de passe";
+                  if (value != pass.text) return "Les mots de passe ne correspondent pas";
+                  return null;
+                },
+              ),
+              const SizedBox(height: 30),
+              ElevatedButton(
+                onPressed: () async {
+                  if (_passwordKey.currentState!.validate()) {
+                    try {
+                      // Envoi lien réinitialisation mot de passe
+                      await FirebaseAuth.instance.sendPasswordResetEmail(email: widget.email);
+
+                      // Supprimer OTP de Firestore
+                      await FirebaseFirestore.instance.collection("password_otps").doc(widget.email).delete();
+
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(
+                          content: Text("Un email a été envoyé pour réinitialiser votre mot de passe. Connectez-vous ensuite avec le nouveau mot de passe."),
+                        ),
+                      );
+
+                      Navigator.popUntil(context, (route) => route.isFirst);
+                    } catch (e) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(content: Text("Erreur : $e")),
+                      );
+                    }
+                  }
+                },
+                style: ElevatedButton.styleFrom(
+                  minimumSize: const Size(double.infinity, 50),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(30),
+                  ),
+                ),
+                child: const Text("Continuer", style: TextStyle(fontSize: 15)),
+              ),
+            ],
+          ),
+        ),
+      ),
     );
   }
 }

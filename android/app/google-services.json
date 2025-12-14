@@ -1,0 +1,54 @@
+{
+  "project_info": {
+    "project_number": "1099115273236",
+    "project_id": "coiffeasy-4adf1",
+    "storage_bucket": "coiffeasy-4adf1.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1099115273236:android:994edf6b822fbed5475b01",
+        "android_client_info": {
+          "package_name": "com.example.gestion_jr"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "1099115273236-9du9vm9o782o35br1p58o2ideli0p93i.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.gestion_jr",
+            "certificate_hash": "84aaea81e9f3b135be5931b498d3fbc501bb1429"
+          }
+        },
+        {
+          "client_id": "1099115273236-ee2cp3rfedofespn3idohdt88qh56gvh.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCK7BsUzVT4EQmgdYgDEasrWBaDAWK9JFU"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "1099115273236-ee2cp3rfedofespn3idohdt88qh56gvh.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "1099115273236-7m1qlblo4dlotedc9tikoravi5nuh4bo.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.example.gestionJr"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
