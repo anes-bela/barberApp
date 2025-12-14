@@ -52,7 +52,7 @@ class MyApp extends StatelessWidget {
               ),
             ),
 
-            cardTheme: CardTheme(
+            cardTheme: CardThemeData(
               color: Colors.green[50],
               elevation: 4,
               shape: RoundedRectangleBorder(
@@ -100,7 +100,7 @@ class MyApp extends StatelessWidget {
               unselectedItemColor: Colors.grey,
             ),
 
-            cardTheme: CardTheme(
+            cardTheme: CardThemeData(
               color: Colors.grey[900],
               elevation: 4,
               shape: RoundedRectangleBorder(
