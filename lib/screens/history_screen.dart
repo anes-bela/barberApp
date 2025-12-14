@@ -27,22 +27,25 @@ class HistoryScreen extends StatelessWidget {
           const SizedBox(height: 16),
           Expanded(
             child: appState.history.isEmpty
-                ? Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Icon(Icons.history, size: 64, color: Colors.grey[300]),
-                      const SizedBox(height: 16),
-                      Text(
-                        'Aucun historique',
-                        style: TextStyle(fontSize: 18, color: Colors.grey[500]),
-                      ),
-                      const SizedBox(height: 8),
-                      Text(
-                        'Les journées clôturées apparaîtront ici',
-                        style: TextStyle(color: Colors.grey[400]),
-                        textAlign: TextAlign.center,
-                      ),
-                    ],
+                ? Center(
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(Icons.history, size: 64, color: Colors.grey[300]),
+                        const SizedBox(height: 16),
+                        Text(
+                          'Aucun historique',
+                          style:
+                              TextStyle(fontSize: 18, color: Colors.grey[500]),
+                        ),
+                        const SizedBox(height: 8),
+                        Text(
+                          'Les journées clôturées apparaîtront ici',
+                          style: TextStyle(color: Colors.grey[400]),
+                          textAlign: TextAlign.center,
+                        ),
+                      ],
+                    ),
                   )
                 : ListView.separated(
                     itemCount: appState.history.length,

@@ -24,7 +24,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
   void _showAddServiceDialog(BuildContext context) {
     final nameController = TextEditingController();
     final priceController = TextEditingController();
-    
+
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
@@ -61,11 +61,13 @@ class _SettingsScreenState extends State<SettingsScreen> {
               final price = int.tryParse(priceController.text) ?? 0;
               if (name.isNotEmpty && price > 0) {
                 Provider.of<AppState>(context, listen: false)
-                  .addPredefinedService(name, price);
+                    .addPredefinedService(name, price);
                 Navigator.pop(context);
               } else {
                 ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text('Veuillez remplir tous les champs correctement')),
+                  const SnackBar(
+                      content: Text(
+                          'Veuillez remplir tous les champs correctement')),
                 );
               }
             },
@@ -76,10 +78,12 @@ class _SettingsScreenState extends State<SettingsScreen> {
     );
   }
 
-  void _showEditServiceDialog(BuildContext context, PredefinedService service, int index) {
+  void _showEditServiceDialog(
+      BuildContext context, PredefinedService service, int index) {
     final nameController = TextEditingController(text: service.name);
-    final priceController = TextEditingController(text: service.price.toString());
-    
+    final priceController =
+        TextEditingController(text: service.price.toString());
+
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
@@ -116,7 +120,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
               final price = int.tryParse(priceController.text) ?? 0;
               if (name.isNotEmpty && price > 0) {
                 Provider.of<AppState>(context, listen: false)
-                  .updatePredefinedService(index, name, price);
+                    .updatePredefinedService(index, name, price);
                 Navigator.pop(context);
               }
             },
@@ -125,7 +129,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
           IconButton(
             onPressed: () {
               Provider.of<AppState>(context, listen: false)
-                .removePredefinedService(index);
+                  .removePredefinedService(index);
               Navigator.pop(context);
             },
             icon: const Icon(Icons.delete, color: Colors.red),
@@ -147,13 +151,15 @@ class _SettingsScreenState extends State<SettingsScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(
-                'PARAMÈTRES',
-                style: TextStyle(
-                  fontSize: 20,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.grey[700],
-                  letterSpacing: 1.0,
+              Center(
+                child: Text(
+                  'PARAMÈTRES',
+                  style: TextStyle(
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.grey[700],
+                    letterSpacing: 1.0,
+                  ),
                 ),
               ),
               const SizedBox(height: 24),
@@ -233,8 +239,10 @@ class _SettingsScreenState extends State<SettingsScreen> {
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
                           Text('0%', style: TextStyle(color: Colors.grey[600])),
-                          Text('50%', style: TextStyle(color: Colors.grey[600])),
-                          Text('100%', style: TextStyle(color: Colors.grey[600])),
+                          Text('50%',
+                              style: TextStyle(color: Colors.grey[600])),
+                          Text('100%',
+                              style: TextStyle(color: Colors.grey[600])),
                         ],
                       ),
                       const SizedBox(height: 20),
@@ -419,7 +427,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                         ),
                       ),
                       const SizedBox(height: 12),
-                      
+
                       // BOUTON AJOUTER SERVICE
                       ElevatedButton(
                         onPressed: () => _showAddServiceDialog(context),
@@ -431,7 +439,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                         child: const Text('➕ Ajouter un service'),
                       ),
                       const SizedBox(height: 12),
-                      
+
                       // LISTE DES SERVICES
                       Consumer<AppState>(
                         builder: (context, appState, child) {
@@ -445,10 +453,13 @@ class _SettingsScreenState extends State<SettingsScreen> {
                               ),
                             );
                           }
-                          
+
                           return Column(
                             children: [
-                              ...appState.predefinedServices.asMap().entries.map((entry) {
+                              ...appState.predefinedServices
+                                  .asMap()
+                                  .entries
+                                  .map((entry) {
                                 final service = entry.value;
                                 final index = entry.key;
                                 return Card(
@@ -456,22 +467,28 @@ class _SettingsScreenState extends State<SettingsScreen> {
                                   child: ListTile(
                                     title: Text(
                                       service.name,
-                                      style: const TextStyle(fontWeight: FontWeight.w500),
+                                      style: const TextStyle(
+                                          fontWeight: FontWeight.w500),
                                     ),
                                     subtitle: Text('${service.price} DA'),
                                     trailing: Row(
                                       mainAxisSize: MainAxisSize.min,
                                       children: [
                                         IconButton(
-                                          onPressed: () => _showEditServiceDialog(context, service, index),
-                                          icon: const Icon(Icons.edit, color: Colors.blue),
+                                          onPressed: () =>
+                                              _showEditServiceDialog(
+                                                  context, service, index),
+                                          icon: const Icon(Icons.edit,
+                                              color: Colors.blue),
                                         ),
                                         IconButton(
                                           onPressed: () {
-                                            Provider.of<AppState>(context, listen: false)
-                                              .removePredefinedService(index);
+                                            Provider.of<AppState>(context,
+                                                    listen: false)
+                                                .removePredefinedService(index);
                                           },
-                                          icon: const Icon(Icons.delete, color: Colors.red),
+                                          icon: const Icon(Icons.delete,
+                                              color: Colors.red),
                                         ),
                                       ],
                                     ),
